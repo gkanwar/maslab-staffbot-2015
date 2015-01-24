@@ -1,0 +1,3 @@
+To build:
+1. mkdir obj, mkdir lib, mkdir bin
+2. make <target>
