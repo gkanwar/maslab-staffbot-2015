@@ -1,11 +1,12 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <cassert>
 #include <vector>
 
+#include "error.h"
+
 #define TILE_SIZE 0.1
-#define GRID_SIZE 500
+#define GRID_SIZE 501
 
 using namespace std;
 
@@ -51,6 +52,8 @@ class Map {
     return grid[xCoord][yCoord];
   }
 
+  void renderMap();
+
  private:
   void fillLine(int startX, int startY, int endX, int endY, MapElement elt);
 
@@ -59,15 +62,15 @@ class Map {
   }
 
   inline void checkPoint(double x, double y) {
-    assert(x >= 0 &&
-           y >= 0 &&
-           x <= GRID_SIZE*TILE_SIZE &&
-           y <= GRID_SIZE*TILE_SIZE);
+    rassert(x >= 0 &&
+            y >= 0 &&
+            x < GRID_SIZE*TILE_SIZE &&
+            y < GRID_SIZE*TILE_SIZE);
   }
 
-  // Grid of 500x500 tiles of size 0.1m x 0.1m
+  // Grid of 501x501 tiles of size 0.1m x 0.1m, i.e. a 50mx50m grid
   // Index (i,j) is centered at (i*0.1m, j*0.1m)
-  MapElement grid[GRID_SIZE+1][GRID_SIZE+1];
+  MapElement grid[GRID_SIZE][GRID_SIZE];
 };
 
 #endif

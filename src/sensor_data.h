@@ -1,7 +1,7 @@
 #ifndef SENSOR_DATA_H
 #define SENSOR_DATA_H
 
-#include <cassert>
+#include "error.h"
 
 // Interface for a sensor data bundle
 class SensorData {
@@ -9,7 +9,8 @@ class SensorData {
   // Compute probability of this sensor reading given pose and map
   virtual double computeProb(RobotPose pose, Map map) {
     // Subclasses should implement
-    assert(false);
+    rassert(false)
+        << "computeProb must be implemented by SensorData subclasses";
   }
 };
 

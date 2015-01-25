@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "render.h"
+
 
 // Rasterize a line into our grid
 // startGX, startGY, endGX, endGY all in grid units
@@ -38,12 +40,28 @@ void Map::fillLine(int startGX, int startGY, int endGX, int endGY, MapElement el
     int loopEndY = (startGY < endGY) ? endGY : startGY;
     int y = loopStartY;
     for (int x = loopStartX; x <= loopEndX; ++x) {
-      assert(y <= loopEndY);
+      rassert(y <= loopEndY);
       grid[x][y] = elt;
       ++y;
     }
   }
   else {
-    assert(false);
+    rassert(false) << "Invalid line angle";
+  }
+}
+
+void Map::renderMap() {
+  int tileSize = (int)(RENDER_WIDTH / (double)GRID_SIZE);
+  for (int i = 0; i < GRID_SIZE; ++i) {
+    for (int j = 0; j < GRID_SIZE; ++j) {
+      if (grid[i][j] == WALL) {
+        drawRect(i*tileSize, RENDER_HEIGHT-j*tileSize,
+                 tileSize, tileSize, 0.5, 0.5, 0.5);
+      }
+      else if (grid[i][j] == PLATFORM) {
+        drawRect(i*tileSize, RENDER_HEIGHT-j*tileSize,
+                 tileSize, tileSize, 1.0, 1.0, 0.0);
+      }
+    }
   }
 }

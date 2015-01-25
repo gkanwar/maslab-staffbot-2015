@@ -7,6 +7,7 @@ TESTDIR = test
 
 INCLUDES = -I$(GTEST)/include -I$(GTEST)/ -I$(SRCDIR)/
 CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread
+LINKFLAGS = -lGL -lglut
 
 # GTEST library
 libgtest: gtest-all.o
@@ -25,11 +26,16 @@ librobot: $(ROBOT_OBJS)
 
 # TESTS
 TEST_SRCS = $(wildcard $(TESTDIR)/*.cpp)
-TEST_OBJS = $(TEST_SRCS:$(TESTDIR)/%.cpp=$(OBJDIR)/%.o)
-$(TEST_OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
-	g++ $(INCLUDES) $(CXXFLAGS) -c $< -o $@
+# TEST_OBJS = $(TEST_SRCS:$(TESTDIR)/%.cpp=$(OBJDIR)/%.o)
+# $(TEST_OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+# 	g++ $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 tests: $(TEST_SRCS) libgtest librobot
 	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_SRCS) $(LIBDIR)/libgtest.a $(LIBROBOT) -o $(BINDIR)/tests
+
+# TEST_LOCALIZATION
+TEST_LOC_SRCS = $(TESTDIR)/test_localization.cpp
+test_localization: $(TEST_LOC_SRCS) librobot
+	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_LOC_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
 
 # CLEAN
 clean:

@@ -1,8 +1,9 @@
 #ifndef PROB_H
 #define PROB_H
 
-#include <cassert>
 #include <cmath>
+
+#include "error.h"
 
 // Representation of probability, using negative log weights for precision
 // in lower numbers
@@ -16,7 +17,7 @@ class Prob {
   Prob() : Prob(0.0) {}
 
   Prob(double negLogProb) : negLogProb(negLogProb) {
-    assert(negLogProb >= 0.0);
+    rassert(negLogProb >= 0.0);
   }
 
   // Extract the linear probability
@@ -25,8 +26,8 @@ class Prob {
   }
 
   static Prob makeFromLinear(double linearProb) {
-    assert(linearProb > 0.0);
-    assert(linearProb <= 1.0);
+    rassert(linearProb > 0.0);
+    rassert(linearProb <= 1.0);
     return Prob(-log(linearProb));
   }
 
