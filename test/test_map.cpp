@@ -20,8 +20,3 @@ TEST(MapTest, TestWallRaster) {
   EXPECT_EQ(Map::WALL, m.getMapElement(10.0, 10.0));
   EXPECT_EQ(Map::WALL, m.getMapElement(7.0, 7.0));
 }
-
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
