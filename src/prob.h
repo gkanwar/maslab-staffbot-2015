@@ -12,13 +12,22 @@ class Prob {
   double negLogProb;
 
  public:
+  // Default to probability of 1.0, -log(1.0) = 0.0
+  Prob() : Prob(0.0) {}
+
   Prob(double negLogProb) : negLogProb(negLogProb) {
-    assert(negLogProb > 0.0);
+    assert(negLogProb >= 0.0);
   }
 
   // Extract the linear probability
   double getProb() {
     return exp(-negLogProb);
+  }
+
+  static Prob makeFromLinear(double linearProb) {
+    assert(linearProb > 0.0);
+    assert(linearProb <= 1.0);
+    return Prob(-log(linearProb));
   }
 
   // Multiply two probabilites
@@ -34,6 +43,19 @@ class Prob {
     double prob2 = exp(-p2.negLogProb);
     return Prob(-log(prob1 + prob2));
   }
+
+  // Divide two probabilities, to normalize p relative to base.
+  static Prob normProb(Prob p, Prob base) {
+    return Prob(p.negLogProb - base.negLogProb);
+  }
+
+  // Compare ops
+  friend inline bool operator<(const Prob& lhs, const Prob& rhs) {
+    return lhs.negLogProb > rhs.negLogProb;
+  }
+  friend inline bool operator>(const Prob& lhs, const Prob& rhs) {return rhs < lhs;}
+  friend inline bool operator<=(const Prob& lhs, const Prob& rhs) {return !(lhs > rhs);}
+  friend inline bool operator>=(const Prob& lhs, const Prob& rhs) {return !(lhs < rhs);}
 };
 
 #endif
