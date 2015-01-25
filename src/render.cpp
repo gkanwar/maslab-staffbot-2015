@@ -69,3 +69,7 @@ void drawRect(int x, int y, int w, int h, double r, double g, double b) {
   rect.b = b;
   rects.push_back(rect);
 }
+
+void joinRenderThread() {
+  pthread_join(glutThread, NULL);
+}

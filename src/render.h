@@ -11,5 +11,6 @@
 #define RENDER_HEIGHT 480
 
 void drawRect(int x, int y, int w, int h, double r, double g, double b);
+void joinRenderThread();
 
 #endif

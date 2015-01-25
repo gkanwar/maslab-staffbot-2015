@@ -1,5 +1,6 @@
 #include "localization.h"
 
+#include "render.h"
 #include "sensor_data.h"
 
 Map getTestMap() {
@@ -17,6 +18,6 @@ class TestSensorData : public SensorData {
 int main() {
   Map testMap = getTestMap();
   testMap.renderMap();
-  while (true) {}
+  joinRenderThread();
   return 0;
 }
