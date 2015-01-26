@@ -13,7 +13,7 @@ default_random_engine generator(
 }  // anonymous namespace
 
 // Return 0-centered gaussian noise with given stdDev
-double gaussianNoise(double stdDev) {
+double gaussianSample(double stdDev) {
   normal_distribution<double> dist(0.0, stdDev);
   return dist(generator);
 }

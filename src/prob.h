@@ -16,15 +16,15 @@ class Prob {
   // Default to probability of 1.0, -log(1.0) = 0.0
   Prob() : Prob(0.0) {}
 
-  Prob(double negLogProb) : negLogProb(negLogProb) {
+  explicit Prob(double negLogProb) : negLogProb(negLogProb) {
     rassert(negLogProb >= 0.0);
   }
 
   // Extract the linear probability
-  double getProb() {
+  double getProb() const {
     return exp(-negLogProb);
   }
-  double getNegLogProb() {
+  double getNegLogProb() const {
     return negLogProb;
   }
 
@@ -49,8 +49,8 @@ class Prob {
   }
 
   // Divide two probabilities, to normalize p relative to base.
-  static Prob normProb(Prob p, Prob base) {
-    return Prob(p.negLogProb - base.negLogProb);
+  static Prob normProb(Prob p, double negLogBase) {
+    return Prob(p.negLogProb - negLogBase);
   }
 
   // Compare ops

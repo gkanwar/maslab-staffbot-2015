@@ -39,6 +39,9 @@ class ParticleFilter {
   // is probability 1, and everything else is proportional.
   void renormalize();
 
+  // Resample particles
+  void resample();
+
   // Draw the particles
   void renderLoc();
 };

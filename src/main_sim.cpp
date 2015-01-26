@@ -44,7 +44,8 @@ class SimSensorData : public SensorData {
     }
     double thetaDist = min(thetaDist1, thetaDist2);
 
-    return (0.5*thetaDist/PI) * max(1.0 - (distSq / 25.0), 0.0);
+    return Prob::makeFromLinear((0.5*thetaDist/PI) *
+                                max(1.0 - (distSq / 25.0), 0.0));
   }
 };
 

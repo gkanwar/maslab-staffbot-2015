@@ -1,6 +1,7 @@
 #include "localization.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "random.h"
 #include "render.h"
@@ -16,8 +17,8 @@ namespace loc {
 ParticleFilter::ParticleFilter(double startX, double startY, Map map) : map(map) {
   for (int i = 0; i < NUM_PARTS; ++i) {
     // Just guessing at some reasonable noise
-    double partX = startX + gaussianNoise(0.5);
-    double partY = startY + gaussianNoise(0.5);
+    double partX = startX + gaussianSample(0.5);
+    double partY = startY + gaussianSample(0.5);
     double theta = uniformSample(0.0, 2*PI);
     particles.emplace_back(RobotPose(partX, partY, theta),
                            Prob::makeFromLinear(1.0));
@@ -41,7 +42,20 @@ Particle ParticleFilter::update(const SensorData& reading) {
 
   renormalize();
 
-  return *mostLikely;
+  Particle out = *mostLikely;
+
+  // Possibly resample
+  double weightSqTotal = 0.0;
+  for (const Particle &p : particles) {
+    weightSqTotal += Prob::andProb(p.weight, p.weight).getProb();
+  }
+  double numEffParticles = 1.0 / weightSqTotal;
+  // Less than 0.1% effective particles
+  if (numEffParticles < NUM_PARTS/20.0) {
+    resample();
+  }
+
+  return out;
 }
 
 void ParticleFilter::step(RobotPoseDelta robotPoseDelta) {
@@ -51,22 +65,52 @@ void ParticleFilter::step(RobotPoseDelta robotPoseDelta) {
 }
 
 void ParticleFilter::renormalize() {
-  bool init = false;
-  Prob greatest;
+  double totalProb = 0.0;
   for (Particle &p : particles) {
-    if (!init || p.weight > greatest) {
-      greatest = p.weight;
-      init = true;
-    }
+    totalProb += p.weight.getProb();
   }
 
+  double negLogTotalProb = -log(totalProb);
   for (Particle &p : particles) {
-    p.weight = Prob::normProb(p.weight, greatest);
+    p.weight = Prob::normProb(p.weight, negLogTotalProb);
   }
+}
+
+void ParticleFilter::resample() {
+  // TODO: Is simple resampling enough?
+  vector<Particle> resampled;
+  vector<double> cumulativeProb;
+  double curProb = 0.0;
+  for (Particle &p : particles) {
+    curProb += p.weight.getProb();
+    cumulativeProb.push_back(curProb);
+  }
+  rassert(abs(curProb - 1.0) < 0.0000001)
+      << "Total probability too far off of 1: " << curProb;
+
+  for (int i = 0; i < NUM_PARTS; ++i) {
+    double rand = uniformSample(0.0, 1.0);
+    for (int j = 0; j < cumulativeProb.size(); ++j) {
+      double prob = cumulativeProb[j];
+      if (prob >= rand) {
+        Particle newPart = particles[j];
+        newPart.pose.addDelta(RobotPoseDelta(gaussianSample(0.1),
+                                             gaussianSample(0.1),
+                                             gaussianSample(0.1)));
+        resampled.push_back(newPart);
+        break;
+      }
+    }
+    rassert(resampled.size() == i+1)
+        << "Resampled size is: " << resampled.size() << ", not: " << i+1;
+  }
+
+  particles = resampled;
 }
 
 void ParticleFilter::renderLoc() {
   for (Particle &p : particles) {
+    if (p.weight.getNegLogProb() > 10.0) continue;
     double red = max(0.2, 1.0 - p.weight.getNegLogProb() / 10.0);
     drawRect(p.pose.x*(RENDER_WIDTH/(double)(GRID_SIZE*TILE_SIZE)),
              p.pose.y*(RENDER_HEIGHT/(double)(GRID_SIZE*TILE_SIZE)), 1, 1,
