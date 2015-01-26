@@ -112,9 +112,7 @@ void ParticleFilter::renderLoc() {
   for (Particle &p : particles) {
     if (p.weight.getNegLogProb() > 10.0) continue;
     double red = max(0.2, 1.0 - p.weight.getNegLogProb() / 10.0);
-    drawRect(p.pose.x*(RENDER_WIDTH/(double)(GRID_SIZE*TILE_SIZE)),
-             p.pose.y*(RENDER_HEIGHT/(double)(GRID_SIZE*TILE_SIZE)), 1, 1,
-             red, 0.0, 0.0);
+    drawRect(p.pose.x-0.5, p.pose.y-0.5, 1.0, 1.0, red, 0.0, 0.0);
   }
 }
 

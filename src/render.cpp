@@ -7,11 +7,12 @@
 #include <vector>
 
 #include "error.h"
+#include "map.h"
 
 namespace {
 
 struct RenderRect {
-  int x, y, w, h;
+  double x, y, w, h;
   double r, g, b;
 };
 
@@ -19,6 +20,11 @@ bool init = false;
 bool frameDirty = false;
 vector<RenderRect> rects;
 pthread_t glutThread;
+
+double boundsLeft = 0.0;
+double boundsRight = GRID_SIZE*TILE_SIZE;
+double boundsBottom = 0.0;
+double boundsTop = GRID_SIZE*TILE_SIZE;
 
 void* glutThreadFunc(void* args) {
   glutMainLoop();
@@ -30,12 +36,13 @@ void render() {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(boundsLeft, boundsRight, boundsBottom, boundsTop, 1, -1);
+
     for (RenderRect r : rects) {
       glColor3f(r.r, r.g, r.b);
-      glRectf(2*r.x/(double)RENDER_WIDTH - 1.0,
-              2*r.y/(double)RENDER_HEIGHT - 1.0,
-              2*(r.x+r.w)/(double)RENDER_WIDTH - 1.0,
-              2*(r.y+r.h)/(double)RENDER_HEIGHT - 1.0);
+      glRectf(r.x, r.y, r.x+r.w, r.y+r.h);
     }
 
     rects.clear();
@@ -45,6 +52,60 @@ void render() {
   }
 
   glutPostRedisplay();
+}
+
+void keyboard(unsigned char key, int x, int y) {
+  switch (key) {
+    case 'a': {
+      double delta = (boundsRight - boundsLeft)*0.1;
+      boundsLeft += delta;
+      boundsRight += delta;
+      break;
+    }
+    case 'd': {
+      double delta = (boundsRight - boundsLeft)*0.1;
+      boundsLeft -= delta;
+      boundsRight -= delta;
+      break;
+    }
+    case 'w': {
+      double delta = (boundsTop - boundsBottom)*0.1;
+      boundsTop -= delta;
+      boundsBottom -= delta;
+      break;
+    }
+    case 's': {
+      double delta = (boundsTop - boundsBottom)*0.1;
+      boundsTop += delta;
+      boundsBottom += delta;
+      break;
+    }
+    case 'q': {
+      double deltaWidth = (boundsRight - boundsLeft)*0.1;
+      double deltaHeight = (boundsTop - boundsBottom)*0.1;
+      boundsTop += deltaHeight;
+      boundsBottom -= deltaHeight;
+      boundsLeft -= deltaWidth;
+      boundsRight += deltaWidth;
+      break;
+    }
+    case 'e': {
+      double deltaWidth = (boundsRight - boundsLeft)*0.1;
+      double deltaHeight = (boundsTop - boundsBottom)*0.1;
+      boundsTop -= deltaHeight;
+      boundsBottom += deltaHeight;
+      boundsLeft += deltaWidth;
+      boundsRight -= deltaWidth;
+      break;
+    }
+    case 'r': {
+      boundsLeft = 0.0;
+      boundsRight = GRID_SIZE*TILE_SIZE;
+      boundsBottom = 0.0;
+      boundsTop = GRID_SIZE*TILE_SIZE;
+      break;
+    }
+  }
 }
 
 // Should be called at the start of every render func
@@ -59,6 +120,7 @@ void initRender() {
     glutCreateWindow("robot");
     glutReshapeWindow(RENDER_WIDTH, RENDER_HEIGHT);
     glutDisplayFunc(render);
+    glutKeyboardFunc(keyboard);
 
     pthread_create(&glutThread, NULL, glutThreadFunc, NULL);
   }
@@ -73,7 +135,7 @@ void drawFrame() {
   }
 }
 
-void drawRect(int x, int y, int w, int h, double r, double g, double b) {
+void drawRect(double x, double y, double w, double h, double r, double g, double b) {
   initRender();
 
   RenderRect rect;

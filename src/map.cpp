@@ -51,16 +51,13 @@ void Map::fillLine(int startGX, int startGY, int endGX, int endGY, MapElement el
 }
 
 void Map::renderMap() {
-  int tileSize = (int)(RENDER_WIDTH / (double)GRID_SIZE);
   for (int i = 0; i < GRID_SIZE; ++i) {
     for (int j = 0; j < GRID_SIZE; ++j) {
       if (grid[i][j] == WALL) {
-        drawRect(i*tileSize, j*tileSize,
-                 tileSize, tileSize, 0.5, 0.5, 0.5);
+        drawRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE, 0.5, 0.5, 0.5);
       }
       else if (grid[i][j] == PLATFORM) {
-        drawRect(i*tileSize, j*tileSize,
-                 tileSize, tileSize, 1.0, 1.0, 0.0);
+        drawRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE, 1.0, 1.0, 0.0);
       }
     }
   }
