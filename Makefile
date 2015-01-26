@@ -30,7 +30,7 @@ TEST_SRCS = $(wildcard $(TESTDIR)/*.cpp)
 # $(TEST_OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 # 	g++ $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 tests: $(TEST_SRCS) libgtest librobot
-	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_SRCS) $(LIBDIR)/libgtest.a $(LIBROBOT) -o $(BINDIR)/tests
+	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_SRCS) $(LIBDIR)/libgtest.a $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/tests
 
 # MAIN_SIM
 MAIN_SIM_SRCS = $(SRCDIR)/main_sim.cpp

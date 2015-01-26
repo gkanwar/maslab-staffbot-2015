@@ -26,9 +26,8 @@ TEST(ProbTest, OrProb) {
 }
 
 TEST(ProbTest, NormProb) {
-  Prob p1 = Prob::makeFromLinear(0.5);
-  Prob p2 = Prob::makeFromLinear(0.125);
-  Prob out = Prob::normProb(p2, p1);
+  Prob p1 = Prob::makeFromLinear(0.125);
+  Prob out = Prob::normProb(p1, -log(0.5));
   EXPECT_NEAR(0.25, out.getProb(), PROB_TOLERANCE);
 }
 

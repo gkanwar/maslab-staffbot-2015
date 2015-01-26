@@ -23,8 +23,8 @@ class Map {
   enum MapElement { NONE, WALL, PLATFORM };
 
   Map(vector<Wall> walls, vector<Wall> platforms) {
-    for (int i = 0; i <= GRID_SIZE; ++i) {
-      for (int j = 0; j <= GRID_SIZE; ++j) {
+    for (int i = 0; i < GRID_SIZE; ++i) {
+      for (int j = 0; j < GRID_SIZE; ++j) {
         grid[i][j] = NONE;
       }
     }
