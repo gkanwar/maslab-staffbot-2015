@@ -24,6 +24,9 @@ class Prob {
   double getProb() {
     return exp(-negLogProb);
   }
+  double getNegLogProb() {
+    return negLogProb;
+  }
 
   static Prob makeFromLinear(double linearProb) {
     rassert(linearProb > 0.0);

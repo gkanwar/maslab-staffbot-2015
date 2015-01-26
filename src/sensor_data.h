@@ -7,7 +7,7 @@
 class SensorData {
  public:
   // Compute probability of this sensor reading given pose and map
-  virtual double computeProb(RobotPose pose, Map map) {
+  virtual Prob computeProb(RobotPose pose, Map map) const {
     // Subclasses should implement
     rassert(false)
         << "computeProb must be implemented by SensorData subclasses";

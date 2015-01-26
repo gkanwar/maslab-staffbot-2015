@@ -2,12 +2,12 @@
 #define ROBOT_H
 
 class RobotPose {
+ public:
   // Meters
   double x, y;
   // Radians
   double theta;
 
- public:
   RobotPose(double x, double y, double theta) : x(x), y(y), theta(theta) {}
 };
 

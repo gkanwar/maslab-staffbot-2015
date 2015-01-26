@@ -55,11 +55,11 @@ void Map::renderMap() {
   for (int i = 0; i < GRID_SIZE; ++i) {
     for (int j = 0; j < GRID_SIZE; ++j) {
       if (grid[i][j] == WALL) {
-        drawRect(i*tileSize, RENDER_HEIGHT-j*tileSize,
+        drawRect(i*tileSize, j*tileSize,
                  tileSize, tileSize, 0.5, 0.5, 0.5);
       }
       else if (grid[i][j] == PLATFORM) {
-        drawRect(i*tileSize, RENDER_HEIGHT-j*tileSize,
+        drawRect(i*tileSize, j*tileSize,
                  tileSize, tileSize, 1.0, 1.0, 0.0);
       }
     }

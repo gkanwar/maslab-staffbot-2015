@@ -1,7 +1,9 @@
 #include "render.h"
 
+#include <chrono>
 #include <cstdlib>
 #include <GL/glut.h>
+#include <thread>
 #include <vector>
 
 #include "error.h"
@@ -14,6 +16,7 @@ struct RenderRect {
 };
 
 bool init = false;
+bool frameDirty = false;
 vector<RenderRect> rects;
 pthread_t glutThread;
 
@@ -23,18 +26,24 @@ void* glutThreadFunc(void* args) {
 }
 
 void render() {
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT);
+  if (frameDirty) {
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-  for (RenderRect r : rects) {
-    glColor3f(r.r, r.g, r.b);
-    glRectf(2*r.x/(double)RENDER_WIDTH - 1.0,
-            2*r.y/(double)RENDER_HEIGHT - 1.0,
-            2*(r.x+r.w)/(double)RENDER_WIDTH - 1.0,
-            2*(r.y+r.h)/(double)RENDER_HEIGHT - 1.0);
+    for (RenderRect r : rects) {
+      glColor3f(r.r, r.g, r.b);
+      glRectf(2*r.x/(double)RENDER_WIDTH - 1.0,
+              2*r.y/(double)RENDER_HEIGHT - 1.0,
+              2*(r.x+r.w)/(double)RENDER_WIDTH - 1.0,
+              2*(r.y+r.h)/(double)RENDER_HEIGHT - 1.0);
+    }
+
+    rects.clear();
+
+    glutSwapBuffers();
+    frameDirty = false;
   }
 
-  glutSwapBuffers();
   glutPostRedisplay();
 }
 
@@ -50,11 +59,19 @@ void initRender() {
     glutCreateWindow("robot");
     glutReshapeWindow(RENDER_WIDTH, RENDER_HEIGHT);
     glutDisplayFunc(render);
+
     pthread_create(&glutThread, NULL, glutThreadFunc, NULL);
   }
 }
 
 }  // anonymous namespace
+
+void drawFrame() {
+  frameDirty = true;
+  while (frameDirty) {
+    this_thread::sleep_for(chrono::milliseconds(10));
+  }
+}
 
 void drawRect(int x, int y, int w, int h, double r, double g, double b) {
   initRender();

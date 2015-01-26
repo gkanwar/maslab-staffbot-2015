@@ -1,15 +1,20 @@
 #include "localization.h"
 
+#include <algorithm>
+
 #include "random.h"
+#include "render.h"
 #include "sensor_data.h"
 #include "util.h"
+
+using namespace std;
+
+#define NUM_PARTS 500
 
 namespace loc {
 
 ParticleFilter::ParticleFilter(double startX, double startY, Map map) : map(map) {
-  // TODO: How many particles do we actually want to create?
-  Prob eachProb = Prob::makeFromLinear(1.0/50000.0);
-  for (int i = 0; i < 50000; ++i) {
+  for (int i = 0; i < NUM_PARTS; ++i) {
     // Just guessing at some reasonable noise
     double partX = startX + gaussianNoise(0.5);
     double partY = startY + gaussianNoise(0.5);
@@ -20,7 +25,7 @@ ParticleFilter::ParticleFilter(double startX, double startY, Map map) : map(map)
   renormalize();
 }
 
-Particle ParticleFilter::update(SensorData reading) {
+Particle ParticleFilter::update(const SensorData& reading) {
   bool init = false;
   Prob greatest;
   const Particle *mostLikely;
@@ -51,6 +56,15 @@ void ParticleFilter::renormalize() {
 
   for (Particle &p : particles) {
     p.weight = Prob::normProb(p.weight, greatest);
+  }
+}
+
+void ParticleFilter::renderLoc() {
+  for (Particle &p : particles) {
+    double red = max(0.2, 1.0 - p.weight.getNegLogProb() / 10.0);
+    drawRect(p.pose.x*(RENDER_WIDTH/(double)(GRID_SIZE*TILE_SIZE)),
+             p.pose.y*(RENDER_HEIGHT/(double)(GRID_SIZE*TILE_SIZE)), 3, 3,
+             red, 0.0, 0.0);
   }
 }
 

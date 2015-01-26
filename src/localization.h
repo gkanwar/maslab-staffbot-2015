@@ -22,16 +22,22 @@ class Particle {
 };
 
 class ParticleFilter {
+ private:
   vector<Particle> particles;
   Map map;
 
+ public:
   ParticleFilter(double startX, double startY, Map map);
 
   // Update given input and return the highest likelihood particle
-  Particle update(SensorData reading);
+  Particle update(const SensorData& reading);
 
-  // Renormalize all probabilities
+  // Renormalize all probabilities, such that the highest probability particle
+  // is probability 1, and everything else is proportional.
   void renormalize();
+
+  // Draw the particles
+  void renderLoc();
 };
 
 }  // namespace loc
