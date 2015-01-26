@@ -58,26 +58,26 @@ void keyboard(unsigned char key, int x, int y) {
   switch (key) {
     case 'a': {
       double delta = (boundsRight - boundsLeft)*0.1;
-      boundsLeft += delta;
-      boundsRight += delta;
-      break;
-    }
-    case 'd': {
-      double delta = (boundsRight - boundsLeft)*0.1;
       boundsLeft -= delta;
       boundsRight -= delta;
       break;
     }
+    case 'd': {
+      double delta = (boundsRight - boundsLeft)*0.1;
+      boundsLeft += delta;
+      boundsRight += delta;
+      break;
+    }
     case 'w': {
       double delta = (boundsTop - boundsBottom)*0.1;
-      boundsTop -= delta;
-      boundsBottom -= delta;
+      boundsTop += delta;
+      boundsBottom += delta;
       break;
     }
     case 's': {
       double delta = (boundsTop - boundsBottom)*0.1;
-      boundsTop += delta;
-      boundsBottom += delta;
+      boundsTop -= delta;
+      boundsBottom -= delta;
       break;
     }
     case 'q': {
