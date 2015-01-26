@@ -32,10 +32,10 @@ TEST_SRCS = $(wildcard $(TESTDIR)/*.cpp)
 tests: $(TEST_SRCS) libgtest librobot
 	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_SRCS) $(LIBDIR)/libgtest.a $(LIBROBOT) -o $(BINDIR)/tests
 
-# TEST_LOCALIZATION
-TEST_LOC_SRCS = $(TESTDIR)/test_localization.cpp
-test_localization: $(TEST_LOC_SRCS) librobot
-	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_LOC_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
+# MAIN_SIM
+MAIN_SIM_SRCS = $(SRCDIR)/main_sim.cpp
+main_sim: $(MAIN_SIM_SRCS) librobot
+	g++ $(INCLUDES) $(CXXFLAGS) $(MAIN_SIM_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
 
 # CLEAN
 clean:
