@@ -44,6 +44,12 @@ Particle ParticleFilter::update(const SensorData& reading) {
   return *mostLikely;
 }
 
+void ParticleFilter::step(RobotPoseDelta robotPoseDelta) {
+  for (Particle &p : particles) {
+    p.pose.addDelta(robotPoseDelta);
+  }
+}
+
 void ParticleFilter::renormalize() {
   bool init = false;
   Prob greatest;
@@ -63,7 +69,7 @@ void ParticleFilter::renderLoc() {
   for (Particle &p : particles) {
     double red = max(0.2, 1.0 - p.weight.getNegLogProb() / 10.0);
     drawRect(p.pose.x*(RENDER_WIDTH/(double)(GRID_SIZE*TILE_SIZE)),
-             p.pose.y*(RENDER_HEIGHT/(double)(GRID_SIZE*TILE_SIZE)), 3, 3,
+             p.pose.y*(RENDER_HEIGHT/(double)(GRID_SIZE*TILE_SIZE)), 1, 1,
              red, 0.0, 0.0);
   }
 }

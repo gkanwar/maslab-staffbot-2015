@@ -5,6 +5,8 @@
 
 #include "render.h"
 #include "sensor_data.h"
+#include "sim_control.h"
+#include "state_estimator.h"
 #include "util.h"
 
 using namespace std;
@@ -31,14 +33,14 @@ class SimSensorData : public SensorData {
     double thetaDist1 = pose.theta - truePose.theta;
     double thetaDist2 = truePose.theta - pose.theta;
     if (thetaDist1 < 0) {
-      rassert(thetaDist2 >= 0);
-      thetaDist1 = 2*PI + thetaDist1;
-      rassert(thetaDist1 >= 0);
+      rassert(thetaDist2 >= 0) << thetaDist2;
+      thetaDist1 += 2*PI;
+      rassert(thetaDist1 >= 0) << thetaDist2;
     }
     else {
-      rassert(thetaDist2 <= 0);
-      thetaDist2 = 2*PI + thetaDist2;
-      rassert(thetaDist2 >= 0);
+      rassert(thetaDist2 <= 0) << thetaDist2;
+      thetaDist2 += 2*PI;
+      rassert(thetaDist2 >= 0) << thetaDist2;
     }
     double thetaDist = min(thetaDist1, thetaDist2);
 
@@ -49,10 +51,11 @@ class SimSensorData : public SensorData {
 int main() {
   Map testMap = getTestMap();
   RobotPose truePose(5.0, 5.0, 0.0);
+  StateEstimator estimator(truePose);
+  SimControl control(estimator);
 
   loc::ParticleFilter pf(5.0, 5.0, testMap);
   while (true) {
-    
     testMap.renderMap();
     pf.renderLoc();
     drawFrame();
@@ -60,6 +63,15 @@ int main() {
     cout << "Best particle: " << best.pose.x << "," << best.pose.y
          << "," << best.pose.theta << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
+    control.setMotorSpeeds(0.5, -0.3);
+
+    // Sim-only step: maintain true info
+    RobotPoseDelta poseDelta = estimator.tick(
+        chrono::system_clock::now(), &truePose);
+    cout << "Pose: " << truePose << endl;
+
+    pf.step(poseDelta);
+
     this_thread::sleep_for(chrono::milliseconds(50));
   }
 

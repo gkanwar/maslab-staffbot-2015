@@ -32,6 +32,9 @@ class ParticleFilter {
   // Update given input and return the highest likelihood particle
   Particle update(const SensorData& reading);
 
+  // Step the estimates given a delta motion
+  void step(RobotPoseDelta robotPoseDelta);
+
   // Renormalize all probabilities, such that the highest probability particle
   // is probability 1, and everything else is proportional.
   void renormalize();
