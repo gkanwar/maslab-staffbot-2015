@@ -5,19 +5,14 @@
 #include "robot.h"
 #include "util.h"
 
-#define ROBOT_RADIUS 0.20
-
-RobotPoseDelta StateEstimator::tick(TimePoint time, RobotPose* pose) {
-  RobotPoseDelta deltaPose(0, 0, 0);
+RobotMotionDelta StateEstimator::tick(TimePoint time, RobotPose* pose) {
+  RobotMotionDelta deltaPose(0, 0);
   if (init) {
     DurationMicro diff = chrono::duration_cast<DurationMicro>(time - lastUpdate);
     double deltaT = 0.000001 * diff.count();
     double rot = deltaT * (rightMotorSpeed - leftMotorSpeed) / 2.0;
-    double deltaTheta = rot / ROBOT_RADIUS;
     double forward = deltaT * (rightMotorSpeed + leftMotorSpeed) / 2.0;
-    double deltaX = cos(lastEst.theta) * forward;
-    double deltaY = sin(lastEst.theta) * forward;
-    deltaPose = RobotPoseDelta(deltaX, deltaY, deltaTheta);
+    deltaPose = RobotMotionDelta(forward, rot);
     lastEst.addDelta(deltaPose);
   }
   lastUpdate = time;

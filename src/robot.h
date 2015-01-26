@@ -5,11 +5,20 @@
 
 #include "util.h"
 
+#define ROBOT_RADIUS 0.20
+
 using namespace std;
 
 class RobotPose;
 // Deltas are represented in the same way as a pose
 typedef RobotPose RobotPoseDelta;
+
+class RobotMotionDelta {
+ public:
+  // Wheel dist in meters
+  double forward, rot;
+  RobotMotionDelta(double forward, double rot) : forward(forward), rot(rot) {}
+};
 
 class RobotPose {
  public:
@@ -24,6 +33,15 @@ class RobotPose {
     x += delta.x;
     y += delta.y;
     theta = addTheta(theta, delta.theta);
+  }
+
+  void addDelta(RobotMotionDelta delta) {
+    double deltaTheta = delta.rot / ROBOT_RADIUS;
+    theta = addTheta(theta, deltaTheta);
+    double deltaX = cos(theta) * delta.forward;
+    double deltaY = sin(theta) * delta.forward;
+    x += deltaX;
+    y += deltaY;
   }
 
   friend ostream& operator<<(ostream& os, const RobotPose& rp) {

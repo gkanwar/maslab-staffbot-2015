@@ -58,9 +58,9 @@ Particle ParticleFilter::update(const SensorData& reading) {
   return out;
 }
 
-void ParticleFilter::step(RobotPoseDelta robotPoseDelta) {
+void ParticleFilter::step(RobotMotionDelta robotDelta) {
   for (Particle &p : particles) {
-    p.pose.addDelta(robotPoseDelta);
+    p.pose.addDelta(robotDelta);
   }
 }
 

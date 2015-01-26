@@ -137,11 +137,11 @@ int main() {
     control.setMotorSpeeds(0.5, -0.3);
 
     // Sim-only step: maintain true info
-    RobotPoseDelta poseDelta = estimator.tick(
+    RobotMotionDelta robotDelta = estimator.tick(
         chrono::system_clock::now(), &truePose);
     cout << "Pose: " << truePose << endl;
 
-    pf.step(poseDelta);
+    pf.step(robotDelta);
 
     this_thread::sleep_for(chrono::milliseconds(50));
   }

@@ -24,7 +24,7 @@ class StateEstimator {
   StateEstimator(RobotPose initPose) : lastEst(initPose), init(false) {}
 
   // TODO: For now, just return robot pose and delta
-  RobotPoseDelta tick(TimePoint time, RobotPose* pose);
+  RobotMotionDelta tick(TimePoint time, RobotPose* pose);
   void updateMotorSpeeds(double left, double right);
 };
 
