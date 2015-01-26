@@ -9,6 +9,9 @@ INCLUDES = -I$(GTEST)/include -I$(GTEST)/ -I$(SRCDIR)/
 CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread
 LINKFLAGS = -lGL -lglut
 
+# ALL target: build every binary
+all: libgtest librobot tests main_sim
+
 # GTEST library
 libgtest: gtest-all.o
 	ar -rv $(LIBDIR)/libgtest.a $(OBJDIR)/gtest-all.o
@@ -18,26 +21,36 @@ gtest-all.o:
 # ROBOT modules library
 ROBOT_SRCS = $(wildcard $(SRCDIR)/*.cpp)
 ROBOT_OBJS = $(ROBOT_SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
-$(ROBOT_OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
-	g++ $(INCLUDES) $(CXXFLAGS) -c $< -o $@
+ROBOT_DEPS = $(ROBOT_SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.d)
 LIBROBOT = $(LIBDIR)/librobot.a
+$(ROBOT_OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+	g++ $(INCLUDES) $(CXXFLAGS) -c $< -MMD -MP -o $@
 librobot: $(ROBOT_OBJS)
 	ar -rv $(LIBROBOT) $(ROBOT_OBJS)
 
 # TESTS
 TEST_SRCS = $(wildcard $(TESTDIR)/*.cpp)
-# TEST_OBJS = $(TEST_SRCS:$(TESTDIR)/%.cpp=$(OBJDIR)/%.o)
-# $(TEST_OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
-# 	g++ $(INCLUDES) $(CXXFLAGS) -c $< -o $@
+tests_depend: .tests_depend
+.tests_depend: $(TEST_SRCS)
+	rm -f .tests_depend
+	g++ $(INCLUDES) $(CXXFLAGS) -MM $^ > .tests_depend
 tests: $(TEST_SRCS) libgtest librobot
 	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_SRCS) $(LIBDIR)/libgtest.a $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/tests
 
 # MAIN_SIM
 MAIN_SIM_SRCS = $(SRCDIR)/main_sim.cpp
+main_sim_depend: .main_sim_depend
+.main_sim_depend: $(MAIN_SIM_SRCS)
+	rm -f .main_sim_depend
+	g++ $(INCLUDES) $(CXXFLAGS) -MM $^ > .main_sim_depend
 main_sim: $(MAIN_SIM_SRCS) librobot
 	g++ $(INCLUDES) $(CXXFLAGS) $(MAIN_SIM_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
 
 # CLEAN
 clean:
-	rm $(ROBOT_OBJS)
-	rm 
+	rm $(OBJDIR)/*
+	rm $(BINDIR)/*
+	rm $(LIBDIR)/*
+
+# Include generated deps files
+-include $(ROBOT_DEPS)
