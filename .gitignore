@@ -32,3 +32,8 @@
 
 # Generated files
 bin/*
+obj/*
+lib/*
+
+# Dot files, including dependency files
+.*
