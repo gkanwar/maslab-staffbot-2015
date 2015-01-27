@@ -13,15 +13,10 @@ default_random_engine generator(
 }  // anonymous namespace
 
 // Return 0-centered gaussian noise with given stdDev
-double gaussianSample(double stdDev) {
-  normal_distribution<double> dist(0.0, stdDev);
-  return dist(generator);
-}
-
+double gaussianSample(double stdDev);
 // Uniform sample in the range [min, max)
-double uniformSample(double min, double max) {
-  uniform_real_distribution<double> dist(min, max);
-  return dist(generator);
-}
+double uniformSample(double min, double max);
+// Return gaussian probability density at dev from center, given stdDev
+double gaussianPDF(double stdDev, double dev);
 
 #endif

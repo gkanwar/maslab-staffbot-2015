@@ -2,11 +2,14 @@
 
 #include <thread>
 #include <chrono>
+#include <cmath>
+#include <vector>
 
 #include "render.h"
 #include "sensor_data.h"
 #include "sim_control.h"
 #include "state_estimator.h"
+#include "random.h"
 #include "util.h"
 
 using namespace std;
@@ -52,71 +55,116 @@ class SimSensorData : public SensorData {
 };
 
 class SimRangeSensorData : public SensorData {
- private:
+ public:
   static vector<RobotVector> sensors;
+ private:
   // TODO: Update this to be reasonable
   static constexpr double rangeThresh = 100.0;
 
   RobotPose truePose;
 
-  vector<double> buildRangeSignature(const RobotPose& pose, const Map& map) {
+  vector<double> buildRangeSignature(RobotPose pose, const Map& map) const {
     vector<double> sig;
-    for (RobotVector sensorPos : sensors) {
+    for (const RobotVector& sensorPos : sensors) {
       Vector origin = sensorPos.getGlobalPos(pose);
       double theta = sensorPos.getGlobalTheta(pose);
+      rassert(map.isValidPoint(origin.x, origin.y))
+          << "Invalid sensor origin: " << origin;
 
       // TODO: This is slow, we can do this smarter if needed
-      vector< pair<int, int> > intersected;
-      for (int i = 0; i < GRID_SIZE; ++i) {
-        for (int j = 0; j < GRID_SIZE; ++j) {
-          double centerX = i*TILE_SIZE;
-          double centerY = j*TILE_SIZE;
-          // For each of the 4 border lines, does the ray intersect?
-          double thetaP1 = getTheta(origin.x, origin.y, centerX-0.5*TILE_SIZE,
-                                    centerY-0.5*TILE_SIZE);
-          double thetaP2 = getTheta(origin.x, origin.y, centerX+0.5*TILE_SIZE,
-                                    centerY-0.5*TILE_SIZE);
-          double thetaP3 = getTheta(origin.x, origin.y, centerX+0.5*TILE_SIZE,
-                                    centerY+0.5*TILE_SIZE);
-          double thetaP4 = getTheta(origin.x, origin.y, centerX-0.5*TILE_SIZE,
-                                    centerY+0.5*TILE_SIZE);
-          if (isThetaContained(thetaP1, thetaP2, theta) ||
-              isThetaContained(thetaP2, thetaP3, theta) ||
-              isThetaContained(thetaP3, thetaP4, theta) ||
-              isThetaContained(thetaP4, thetaP1, theta)) {
-            intersected.push_back(make_pair(i, j));
+      // vector< pair<int, int> > intersected;
+      bool found = false;
+      if (theta <= PI) {
+        // y is pos
+        double err = 0.0;
+        int x = map.toGridCoord(origin.x);
+        for (int y = map.toGridCoord(origin.y); y < GRID_SIZE; ++y) {
+          err += abs(1.0/tan(theta));
+          while (err >= 0.5) {
+            if (x < 0 || x >= GRID_SIZE) break;
+            if (map.isObstacle(x, y)) {
+              sig.push_back(dist(TILE_SIZE*x, TILE_SIZE*y, origin.x, origin.y));
+              found = true;
+              break;
+            }
+            // x is pos
+            if (theta <= 0.5*PI || theta >= 1.5*PI) x++;
+            else x--;
+            err -= 1.0;
           }
+          if (found) break;
         }
       }
-      double minDist = -1;
-      for (auto point : intersected) {
-        double d = dist(point.first, point.second, origin.x, origin.y);
-        if (minDist < 0 ||
-            minDist > d) {
-          minDist = d;
+      else {
+        // y is neg
+        double err = 0.0;
+        int x = map.toGridCoord(origin.x);
+        for (int y = map.toGridCoord(origin.y); y >= 0; --y) {
+          err += abs(1.0/tan(theta));
+          while (err >= 0.5) {
+            if (x < 0 || x >= GRID_SIZE) break;
+            if (map.isObstacle(x, y)) {
+              sig.push_back(dist(TILE_SIZE*x, TILE_SIZE*y, origin.x, origin.y));
+              found = true;
+              break;
+            }
+            // x is pos
+            if (theta <= 0.5*PI || theta >= 1.5*PI) x++;
+            else x--;
+            err -= 1.0;
+          }
+          if (found) break;
         }
       }
 
-      // minDist == -1 indicates no wall
-      if (minDist > rangeThresh) {
-        minDist = -1;
+      // Not found
+      if (!found) {
+        sig.push_back(-1);
       }
-      sig.push_back(minDist);
     }
+    rassert(sig.size() == sensors.size());
+    return sig;
   }
 
  public:
-  SimRangeSensorData(RobotPose truePose) : truePose(truePose) {
-    sensors.emplace_back(0.1, 0, 0);
-    sensors.emplace_back(0.1, 0.5*PI, 0.5*PI);
-    sensors.emplace_back(0.1, PI, PI);
-    sensors.emplace_back(0.1, 1.5*PI, 1.5*PI);
-  }
+  SimRangeSensorData(RobotPose truePose) : truePose(truePose) {}
 
   Prob computeProb(RobotPose pose, Map map) const override {
-    // TODO
-    return Prob::makeFromLinear(1.0);
+    vector<double> rangeSig = buildRangeSignature(pose, map);
+    // cout << "sig done" << endl;
+    Prob out = Prob::makeFromLinear(1.0);
+    rassert(rangeSig.size() == sensors.size());
+    for (int i = 0; i < rangeSig.size(); ++i) {
+      double range = rangeSig[i];
+      // Skip invalid readings
+      // TODO: Perhaps use a low-weighted correlation to expected 
+      if (range < 0) continue;
+
+      Vector origin = sensors[i].getGlobalPos(pose);
+      double sensorTheta = sensors[i].getGlobalTheta(pose);
+      Vector endpoint = getEndpoint(origin, sensorTheta);
+
+      Vector closest = map.getClosest(endpoint.x, endpoint.y);
+      double d = dist(closest.x, closest.y, endpoint.x, endpoint.y);
+      // Thresh for erroneous read
+      if (d > 0.5) {
+        // Penalize misplaced sensor reading
+        // TODO: Is this the right penalty?
+        out = Prob::andProb(out, Prob::makeFromLinear(0.1));
+      }
+      else {
+        out = Prob::andProb(out, Prob::makeFromLinear(gaussianPDF(0.5, d)));
+      }
+    }
+    return out;
   }
+};
+
+vector<RobotVector> SimRangeSensorData::sensors = {
+  RobotVector(0.1, 0, 0),
+  RobotVector(0.1, 0.5*PI, 0.5*PI),
+  RobotVector(0.1, PI, PI),
+  RobotVector(0.1, 1.5*PI, 1.5*PI)
 };
 
 int main() {
@@ -129,8 +177,9 @@ int main() {
   while (true) {
     testMap.renderMap();
     pf.renderLoc();
+    drawRect(truePose.x-0.05, truePose.x+0.05, 0.1, 0.1, 0.0, 1.0, 0.0);
     drawFrame();
-    loc::Particle best = pf.update(SimSensorData(truePose));
+    loc::Particle best = pf.update(SimRangeSensorData(truePose));
     cout << "Best particle: " << best.pose.x << "," << best.pose.y
          << "," << best.pose.theta << endl;
     cout << "Weight: " << best.weight.getProb() << endl;

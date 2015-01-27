@@ -4,9 +4,10 @@
 #include <vector>
 
 #include "error.h"
+#include "util.h"
 
 #define TILE_SIZE 0.1
-#define GRID_SIZE 501
+#define GRID_SIZE 101
 
 using namespace std;
 
@@ -43,9 +44,11 @@ class Map {
       fillLine(toGridCoord(p.startX), toGridCoord(p.startY),
                toGridCoord(p.endX), toGridCoord(p.endY), PLATFORM);
     }
+
+    buildClosestMap();
   }
 
-  MapElement getMapElement(double x, double y) {
+  MapElement getMapElement(double x, double y) const {
     checkPoint(x, y);
     int xCoord = toGridCoord(x);
     int yCoord = toGridCoord(y);
@@ -54,23 +57,46 @@ class Map {
 
   void renderMap();
 
- private:
-  void fillLine(int startX, int startY, int endX, int endY, MapElement elt);
-
-  inline int toGridCoord(double x) {
-    return (int)(x/TILE_SIZE + 0.5);
-  }
-
-  inline void checkPoint(double x, double y) {
-    rassert(x >= 0 &&
+  bool isValidPoint(double x, double y) const {
+    return (x >= 0 &&
             y >= 0 &&
             x < GRID_SIZE*TILE_SIZE &&
             y < GRID_SIZE*TILE_SIZE);
   }
 
+  Vector getClosest(double x, double y) const {
+    return closestMap[toGridCoord(x)][toGridCoord(y)];
+  }
+
+  int toGridCoord(double x) const {
+    return (int)(x/TILE_SIZE + 0.5);
+  }
+  
+  bool isObstacle(int gridX, int gridY) const {
+    rassert(gridX >= 0 && gridX < GRID_SIZE &&
+            gridY >= 0 && gridY < GRID_SIZE)
+        << "Invalid grid point: " << gridX << "," << gridY;
+    return grid[gridX][gridY] == WALL ||
+        grid[gridX][gridY] == PLATFORM;
+  }
+
+ private:
+  void fillLine(int startX, int startY, int endX, int endY, MapElement elt);
+
+  inline void checkPoint(double x, double y) const {
+    rassert(isValidPoint(x, y))
+        << "Point (" << x << "," << y << ") is invalid coords ("
+        << toGridCoord(x) << "," << toGridCoord(y) << ")";
+  }
+
+  Vector computeClosestWall(int gridX, int gridY);
+  void buildClosestMap();
+
   // Grid of 501x501 tiles of size 0.1m x 0.1m, i.e. a 50mx50m grid
   // Index (i,j) is centered at (i*0.1m, j*0.1m)
   MapElement grid[GRID_SIZE][GRID_SIZE];
+
+  Vector closestMap[GRID_SIZE][GRID_SIZE];
 };
 
 #endif

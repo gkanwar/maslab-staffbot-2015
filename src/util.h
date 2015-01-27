@@ -28,7 +28,7 @@ inline double addTheta(double t1, double t2) {
 
 // Get theta for a line segment
 inline double getTheta(double x1, double y1, double x2, double y2) {
-  return atan2(y2-y1, x2-x1);
+  return normTheta(atan2(y2-y1, x2-x1));
 }
 
 // Return whether the given angle is contained between first and second, inclusive
@@ -57,7 +57,18 @@ class Vector {
   // Meters, in global coords
   double x, y;
 
+  Vector() : Vector(0, 0) {}
   Vector(double x, double y) : x(x), y(y) {}
+
+  friend ostream& operator<<(ostream& os, const Vector& value) {
+    os << "<" << value.x << "," << value.y << ">";
+    return os;
+  }
 };
+
+// Get a ray endpoint given an origin and theta
+inline Vector getEndpoint(Vector origin, double theta) {
+  return Vector(origin.x + cos(theta), origin.y + sin(theta));
+}
 
 #endif

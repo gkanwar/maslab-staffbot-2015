@@ -62,13 +62,19 @@ class RobotVector {
   RobotVector(double dist, double robotTheta, double theta)
       : dist(dist), robotTheta(robotTheta), theta(theta) {}
 
-  Vector getGlobalPos(RobotPose pose) {
+  Vector getGlobalPos(RobotPose pose) const {
     double totalTheta = addTheta(robotTheta, pose.theta);
-    return Vector(pose.x + sin(totalTheta)*dist, pose.y + cos(totalTheta)*dist);
+    return Vector(pose.x + cos(totalTheta)*dist, pose.y + sin(totalTheta)*dist);
   }
 
-  double getGlobalTheta(RobotPose pose) {
+  double getGlobalTheta(RobotPose pose) const {
     return addTheta(addTheta(theta, robotTheta), pose.theta);
+  }
+
+  friend ostream& operator<<(ostream& os, const RobotVector& value) {
+    os << "(" << value.dist << "@" << value.robotTheta
+       << ", pointing " << value.theta << ")";
+    return os;
   }
 };
 

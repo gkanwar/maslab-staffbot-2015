@@ -62,3 +62,35 @@ void Map::renderMap() {
     }
   }
 }
+
+Vector Map::computeClosestWall(int gridX, int gridY) {
+  rassert(gridX >= 0 && gridX < GRID_SIZE &&
+          gridY >= 0 && gridY < GRID_SIZE);
+  double closestErr = -1;
+  Vector closest;
+  for (int i = 0; i < GRID_SIZE; ++i) {
+    for (int j = 0; j < GRID_SIZE; ++j) {
+      if (grid[i][j] == Map::WALL ||
+          grid[i][j] == Map::PLATFORM) {
+        double err = distSq(gridX, gridY, i, j);
+        if (closestErr < 0 || err < closestErr) {
+          closestErr = err;
+          closest = Vector(i*TILE_SIZE, j*TILE_SIZE);
+        }
+      }
+      // if (closestErr > 0 && (j-gridY)*TILE_SIZE > closestErr) break;
+    }
+    // if (closestErr > 0 && (i-gridX)*TILE_SIZE > closestErr) break;
+  }
+  rassert(closestErr >= 0);
+  return closest;
+}
+
+void Map::buildClosestMap() {
+  for (int i = 0; i < GRID_SIZE; ++i) {
+    cout << i << endl;
+    for (int j = 0; j < GRID_SIZE; ++j) {
+      closestMap[i][j] = computeClosestWall(i, j);
+    }
+  }
+}
