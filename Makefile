@@ -6,16 +6,16 @@ BINDIR = bin
 TESTDIR = test
 
 INCLUDES = -I$(GTEST)/include -I$(GTEST)/ -I$(SRCDIR)/
-CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread
+CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread -pg
 LINKFLAGS = -lGL -lglut
 
 # ALL target: build every binary
-all: libgtest librobot tests main_sim
+all: tests main_sim
 
 # GTEST library
 libgtest: gtest-all.o
 	ar -rv $(LIBDIR)/libgtest.a $(OBJDIR)/gtest-all.o
-gtest-all.o:
+gtest-all.o: $(GTEST)/src/gtest-all.cc
 	g++ $(INCLUDES) $(CXXFLAGS) -c $(GTEST)/src/gtest-all.cc -o $(OBJDIR)/gtest-all.o
 
 # ROBOT modules library
