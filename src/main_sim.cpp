@@ -16,9 +16,9 @@ using namespace std;
 
 Map getTestMap() {
   return Map({
-      Wall(1.0, 1.0, 1.0, 10.0),
-      Wall(1.0, 10.0, 10.0, 10.0),
-      Wall(10.0, 10.0, 10.0, 1.0)},
+      Wall(1.0, 1.0, 1.0, 7.0),
+      Wall(1.0, 7.0, 10.0, 7.0),
+      Wall(10.0, 7.0, 10.0, 1.0)},
     { Wall(10.0, 1.0, 1.0, 1.0) });
 }
 
@@ -31,10 +31,9 @@ class SimSensorData : public SensorData {
  public:
   SimSensorData(RobotPose truePose) : truePose(truePose) {}
 
-  Prob computeProb(RobotPose pose, Map map) const override {
+  Prob computeProb(const RobotPose& pose, const Map& map) const override {
     // Quick check: Just return probability based on closeness to existing pose
-    double distSq = (pose.x - truePose.x)*(pose.x - truePose.x) +
-        (pose.y - truePose.y)*(pose.y - truePose.y);
+    double distSquared = distSq(pose.x, pose.y, truePose.x, truePose.y);
     double thetaDist1 = pose.theta - truePose.theta;
     double thetaDist2 = truePose.theta - pose.theta;
     if (thetaDist1 < 0) {
@@ -49,8 +48,8 @@ class SimSensorData : public SensorData {
     }
     double thetaDist = min(thetaDist1, thetaDist2);
 
-    return Prob::makeFromLinear((0.5*thetaDist/PI) *
-                                max(1.0 - (distSq / 25.0), 0.0));
+    return Prob::makeFromLinear(gaussianPDF(0.5*PI, thetaDist) *
+                                gaussianPDF(0.5, distSquared));
   }
 };
 
