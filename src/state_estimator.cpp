@@ -5,7 +5,7 @@
 #include "robot.h"
 #include "util.h"
 
-#define MOTOR_SPEED_PER_POWER 0.1
+#define MOTOR_SPEED_PER_POWER 10.0
 
 RobotMotionDelta StateEstimator::tick(TimePoint time, RobotPose* pose) {
   RobotMotionDelta deltaPose(0, 0);

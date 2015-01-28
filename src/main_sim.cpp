@@ -211,7 +211,7 @@ int main() {
     cout << "Pose: " << truePose << endl;
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
-    control.setMotorSpeeds(0.5, -0.1);
+    control.setMotorSpeeds(0.5, 0.3);
 
     // Sim-only step: maintain true info
     RobotMotionDelta robotDelta = estimator.tick(curTime, &truePose);
