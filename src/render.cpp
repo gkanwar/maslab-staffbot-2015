@@ -135,7 +135,7 @@ void initRender() {
 
 void drawFrame(bool waitForKey) {
   frameDirty = true;
-  waitKey = true;
+  waitKey = waitForKey;
   while (frameDirty || waitKey) {
     this_thread::sleep_for(chrono::milliseconds(10));
   }
