@@ -18,6 +18,7 @@ struct RenderRect {
 
 bool init = false;
 bool frameDirty = false;
+bool waitKey = true;
 vector<RenderRect> rects;
 pthread_t glutThread;
 
@@ -105,6 +106,10 @@ void keyboard(unsigned char key, int x, int y) {
       boundsTop = GRID_SIZE*TILE_SIZE;
       break;
     }
+    case 'c': {
+      waitKey = false;
+      break;
+    }
   }
 }
 
@@ -128,9 +133,10 @@ void initRender() {
 
 }  // anonymous namespace
 
-void drawFrame() {
+void drawFrame(bool waitForKey) {
   frameDirty = true;
-  while (frameDirty) {
+  waitKey = true;
+  while (frameDirty || waitKey) {
     this_thread::sleep_for(chrono::milliseconds(10));
   }
 }

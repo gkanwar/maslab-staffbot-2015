@@ -12,7 +12,7 @@
 
 // Swap the buffers to display all rendered items between the last drawFrame
 // and now. Note that all persisting items must be redrawn on every frame.
-void drawFrame();
+void drawFrame(bool waitForKey=false);
 void drawRect(double x, double y, double w, double h, double r, double g, double b);
 void joinRenderThread();
 

@@ -174,6 +174,9 @@ int main() {
   SimControl control(estimator);
 
   loc::ParticleFilter pf(5.0, 5.0, testMap);
+  // Fake time for sim
+  TimePoint curTime;
+  const chrono::duration<long int, milli> deltaTime = chrono::milliseconds(50);
   while (true) {
     testMap.renderMap();
     pf.renderLoc();
@@ -187,12 +190,13 @@ int main() {
 
     // Sim-only step: maintain true info
     RobotMotionDelta robotDelta = estimator.tick(
-        chrono::system_clock::now(), &truePose);
+        curTime, &truePose);
     cout << "Pose: " << truePose << endl;
 
     pf.step(robotDelta);
 
-    this_thread::sleep_for(chrono::milliseconds(50));
+    // Step the sim at a fixed rate
+    curTime = curTime + deltaTime;
   }
 
   joinRenderThread();
