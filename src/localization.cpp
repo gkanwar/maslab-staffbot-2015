@@ -51,7 +51,7 @@ Particle ParticleFilter::update(const SensorData& reading) {
   }
   double numEffParticles = 1.0 / weightSqTotal;
   // Less than 0.1% effective particles
-  if (numEffParticles < NUM_PARTS/20.0) {
+  if (numEffParticles < NUM_PARTS/1000.0) {
     resample();
   }
 
