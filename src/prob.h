@@ -50,7 +50,11 @@ class Prob {
 
   // Divide two probabilities, to normalize p relative to base.
   static Prob normProb(Prob p, double negLogBase) {
-    return Prob(p.negLogProb - negLogBase);
+    // Handle floating point error
+    if (abs(p.negLogProb - negLogBase) < 0.0000001)
+      return Prob(0.0);
+    else
+      return Prob(p.negLogProb - negLogBase);
   }
 
   // Compare ops
@@ -60,6 +64,11 @@ class Prob {
   friend inline bool operator>(const Prob& lhs, const Prob& rhs) {return rhs < lhs;}
   friend inline bool operator<=(const Prob& lhs, const Prob& rhs) {return !(lhs > rhs);}
   friend inline bool operator>=(const Prob& lhs, const Prob& rhs) {return !(lhs < rhs);}
+
+  friend ostream& operator<<(ostream& os, const Prob& value) {
+    os << value.getProb();
+    return os;
+  }
 };
 
 #endif

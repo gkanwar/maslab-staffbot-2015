@@ -18,6 +18,11 @@ class RobotMotionDelta {
   // Wheel dist in meters
   double forward, rot;
   RobotMotionDelta(double forward, double rot) : forward(forward), rot(rot) {}
+
+  friend ostream& operator<<(ostream& os, const RobotMotionDelta& value) {
+    os << "<RobotMotionDelta>(" << value.forward << "," << value.rot << ")";
+    return os;
+  }
 };
 
 class RobotPose {
@@ -68,7 +73,7 @@ class RobotVector {
   }
 
   double getGlobalTheta(RobotPose pose) const {
-    return addTheta(addTheta(theta, robotTheta), pose.theta);
+    return addTheta(theta, pose.theta);
   }
 
   friend ostream& operator<<(ostream& os, const RobotVector& value) {

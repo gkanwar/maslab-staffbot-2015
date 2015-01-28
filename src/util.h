@@ -66,9 +66,9 @@ class Vector {
   }
 };
 
-// Get a ray endpoint given an origin and theta
-inline Vector getEndpoint(Vector origin, double theta) {
-  return Vector(origin.x + cos(theta), origin.y + sin(theta));
+// Get a ray endpoint given an origin, theta, and distance
+inline Vector getEndpoint(Vector origin, double theta, double d) {
+  return Vector(origin.x + d*cos(theta), origin.y + d*sin(theta));
 }
 
 #endif

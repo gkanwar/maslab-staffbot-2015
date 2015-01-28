@@ -61,6 +61,7 @@ class SimRangeSensorData : public SensorData {
   static constexpr double rangeThresh = 100.0;
 
   RobotPose truePose;
+  vector<double> trueRangeSig;
 
   vector<double> buildRangeSignature(RobotPose pose, const Map& map) const {
     vector<double> sig;
@@ -126,34 +127,28 @@ class SimRangeSensorData : public SensorData {
   }
 
  public:
-  SimRangeSensorData(RobotPose truePose) : truePose(truePose) {}
+  SimRangeSensorData(RobotPose truePose, const Map& map) : truePose(truePose) {
+    trueRangeSig = buildRangeSignature(truePose, map);
+  }
 
-  Prob computeProb(RobotPose pose, Map map) const override {
-    vector<double> rangeSig = buildRangeSignature(pose, map);
+  Prob computeProb(const RobotPose& pose, const Map &map) const override {
     // cout << "sig done" << endl;
     Prob out = Prob::makeFromLinear(1.0);
-    rassert(rangeSig.size() == sensors.size());
-    for (int i = 0; i < rangeSig.size(); ++i) {
-      double range = rangeSig[i];
+    rassert(trueRangeSig.size() == sensors.size());
+    for (int i = 0; i < trueRangeSig.size(); ++i) {
+      double range = trueRangeSig[i];
       // Skip invalid readings
       // TODO: Perhaps use a low-weighted correlation to expected 
       if (range < 0) continue;
 
       Vector origin = sensors[i].getGlobalPos(pose);
       double sensorTheta = sensors[i].getGlobalTheta(pose);
-      Vector endpoint = getEndpoint(origin, sensorTheta);
+      Vector endpoint = getEndpoint(origin, sensorTheta, range);
 
       Vector closest = map.getClosest(endpoint.x, endpoint.y);
       double d = dist(closest.x, closest.y, endpoint.x, endpoint.y);
-      // Thresh for erroneous read
-      if (d > 0.5) {
-        // Penalize misplaced sensor reading
-        // TODO: Is this the right penalty?
-        out = Prob::andProb(out, Prob::makeFromLinear(0.1));
-      }
-      else {
-        out = Prob::andProb(out, Prob::makeFromLinear(gaussianPDF(0.5, d)));
-      }
+
+      out = Prob::andProb(out, Prob::makeFromLinear(gaussianPDF(0.5, d)));
     }
     return out;
   }
@@ -179,18 +174,16 @@ int main() {
   while (true) {
     testMap.renderMap();
     pf.renderLoc();
-    drawRect(truePose.x-0.05, truePose.x+0.05, 0.1, 0.1, 0.0, 1.0, 0.0);
+    drawRect(truePose.x-0.05, truePose.y-0.05, 0.1, 0.1, 0.0, 1.0, 0.0);
     drawFrame();
-    loc::Particle best = pf.update(SimRangeSensorData(truePose));
-    cout << "Best particle: " << best.pose.x << "," << best.pose.y
-         << "," << best.pose.theta << endl;
+    loc::Particle best = pf.update(SimRangeSensorData(truePose, testMap));
+    cout << "Pose: " << truePose << endl;
+    cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
-    control.setMotorSpeeds(0.5, -0.3);
+    control.setMotorSpeeds(0.5, -0.1);
 
     // Sim-only step: maintain true info
-    RobotMotionDelta robotDelta = estimator.tick(
-        curTime, &truePose);
-    cout << "Pose: " << truePose << endl;
+    RobotMotionDelta robotDelta = estimator.tick(curTime, &truePose);
 
     pf.step(robotDelta);
 

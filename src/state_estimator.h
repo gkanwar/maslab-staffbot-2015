@@ -25,7 +25,7 @@ class StateEstimator {
 
   // TODO: For now, just return robot pose and delta
   RobotMotionDelta tick(TimePoint time, RobotPose* pose);
-  void updateMotorSpeeds(double left, double right);
+  void updateMotorSpeeds(double leftPower, double rightPower);
 };
 
 #endif

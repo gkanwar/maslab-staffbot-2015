@@ -13,5 +13,5 @@ double uniformSample(double min, double max) {
 }
 
 double gaussianPDF(double stdDev, double dev) {
-  return exp(-dev*dev / (2*stdDev*stdDev)) / (stdDev*sqrt(2*PI));
+  return exp(-dev*dev / (2*stdDev*stdDev));
 }

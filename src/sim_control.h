@@ -9,7 +9,7 @@ class SimControl {
  public:
   // Accepts state estimator 
   SimControl(StateEstimator& estimator) : estimator(estimator) {}
-  void setMotorSpeeds(double left, double right);
+  void setMotorSpeeds(double leftPower, double rightPower);
 };
 
 #endif
