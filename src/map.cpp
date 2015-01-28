@@ -91,6 +91,8 @@ void Map::buildClosestMap() {
     cout << i << endl;
     for (int j = 0; j < GRID_SIZE; ++j) {
       closestMap[i][j] = computeClosestWall(i, j);
+      // Sanity check
+      checkPoint(closestMap[i][j].x, closestMap[i][j].y);
     }
   }
 }

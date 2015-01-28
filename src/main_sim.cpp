@@ -144,8 +144,8 @@ class SimRangeSensorData : public SensorData {
       Vector origin = sensors[i].getGlobalPos(pose);
       double sensorTheta = sensors[i].getGlobalTheta(pose);
       Vector endpoint = getEndpoint(origin, sensorTheta, range);
-
-      Vector closest = map.getClosest(endpoint.x, endpoint.y);
+      Vector endpointClamped = map.clampPoint(endpoint);
+      Vector closest = map.getClosest(endpointClamped.x, endpointClamped.y);
       double d = dist(closest.x, closest.y, endpoint.x, endpoint.y);
 
       out = Prob::andProb(out, Prob::makeFromLinear(gaussianPDF(0.5, d)));

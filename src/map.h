@@ -64,12 +64,24 @@ class Map {
             y < GRID_SIZE*TILE_SIZE);
   }
 
+  Vector clampPoint(Vector pt) const {
+    double x = pt.x;
+    double y = pt.y;
+    if (x < 0) x = 0;
+    else if (x >= GRID_SIZE*TILE_SIZE) x = (GRID_SIZE-1)*TILE_SIZE;
+    if (y < 0) y = 0;
+    else if (y >= GRID_SIZE*TILE_SIZE) y = (GRID_SIZE-1)*TILE_SIZE;
+    return Vector(x, y);
+  }
+
   Vector getClosest(double x, double y) const {
     return closestMap[toGridCoord(x)][toGridCoord(y)];
   }
 
   int toGridCoord(double x) const {
-    return (int)(x/TILE_SIZE + 0.5);
+    int gc = (int)(x/TILE_SIZE);
+    rassert(gc >= 0 && gc < GRID_SIZE);
+    return gc;
   }
   
   bool isObstacle(int gridX, int gridY) const {
@@ -93,7 +105,7 @@ class Map {
   void buildClosestMap();
 
   // Grid of 501x501 tiles of size 0.1m x 0.1m, i.e. a 50mx50m grid
-  // Index (i,j) is centered at (i*0.1m, j*0.1m)
+  // Index (i,j) has lower left (i*0.1m, j*0.1m)
   MapElement grid[GRID_SIZE][GRID_SIZE];
 
   Vector closestMap[GRID_SIZE][GRID_SIZE];

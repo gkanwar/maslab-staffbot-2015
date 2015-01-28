@@ -50,8 +50,9 @@ Particle ParticleFilter::update(const SensorData& reading) {
     weightSqTotal += Prob::andProb(p.weight, p.weight).getProb();
   }
   double numEffParticles = 1.0 / weightSqTotal;
-  // Less than 0.1% effective particles
-  if (numEffParticles < NUM_PARTS/1000.0) {
+  cout << "Effective particles: " << numEffParticles << endl;
+  // Less than 1% effective particles
+  if (numEffParticles < NUM_PARTS/100.0) {
     resample();
   }
 
@@ -77,6 +78,7 @@ void ParticleFilter::renormalize() {
 }
 
 void ParticleFilter::resample() {
+  cout << "Resampling." << endl;
   // TODO: Is simple resampling enough?
   vector<Particle> resampled;
   vector<double> cumulativeProb;
