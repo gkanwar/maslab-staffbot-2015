@@ -90,7 +90,13 @@ void ParticleFilter::resample() {
   rassert(abs(curProb - 1.0) < 0.0000001)
       << "Total probability too far off of 1: " << curProb;
 
-  for (int i = 0; i < NUM_PARTS; ++i) {
+  int i;
+  // TUNE: If we run into kidnapped robot problems, allow for some completely
+  // random resampling.
+  int randomResample = 0; // NUM_PARTS/10;
+  bool lowestInit = false;
+  Prob lowest;
+  for (i = 0; i < NUM_PARTS - randomResample; ++i) {
     double rand = uniformSample(0.0, 1.0);
     for (int j = 0; j < cumulativeProb.size(); ++j) {
       double prob = cumulativeProb[j];
@@ -99,12 +105,23 @@ void ParticleFilter::resample() {
         newPart.pose.addDelta(RobotPoseDelta(gaussianSample(0.1),
                                              gaussianSample(0.1),
                                              gaussianSample(0.1)));
+        if (!lowestInit || lowest >= newPart.weight) {
+          lowest = newPart.weight;
+          lowestInit = true;
+        }
         resampled.push_back(newPart);
         break;
       }
     }
     rassert(resampled.size() == i+1)
         << "Resampled size is: " << resampled.size() << ", not: " << i+1;
+  }
+  for (; i < NUM_PARTS; ++i) {
+    // Match the lowest particle prob, for stability
+    resampled.push_back(Particle(RobotPose(
+        uniformSample(0.0, GRID_SIZE*TILE_SIZE),
+        uniformSample(0.0, GRID_SIZE*TILE_SIZE),
+        uniformSample(0.0, 2*PI)), lowest));
   }
 
   particles = resampled;

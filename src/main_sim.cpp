@@ -54,14 +54,11 @@ class SimSensorData : public SensorData {
 };
 
 class SimRangeSensorData : public SensorData {
- public:
-  static vector<RobotVector> sensors;
  private:
   // TODO: Update this to be reasonable
   static constexpr double rangeThresh = 100.0;
 
   RobotPose truePose;
-  vector<double> trueRangeSig;
 
   vector<double> buildRangeSignature(RobotPose pose, const Map& map) const {
     vector<double> sig;
@@ -126,7 +123,12 @@ class SimRangeSensorData : public SensorData {
     return sig;
   }
 
+ protected:
+  vector<double> trueRangeSig;
+
  public:
+  static vector<RobotVector> sensors;
+
   SimRangeSensorData(RobotPose truePose, const Map& map) : truePose(truePose) {
     trueRangeSig = buildRangeSignature(truePose, map);
   }
@@ -148,7 +150,9 @@ class SimRangeSensorData : public SensorData {
       Vector closest = map.getClosest(endpointClamped.x, endpointClamped.y);
       double d = dist(closest.x, closest.y, endpoint.x, endpoint.y);
 
-      out = Prob::andProb(out, Prob::makeFromLinear(gaussianPDF(0.5, d)));
+      // TUNE: stddev of PDF should be increased for more stability, reduced for
+      // a more dynamic response.
+      out = Prob::andProb(out, Prob::makeFromLinear(gaussianPDF(1.0, d)));
     }
     return out;
   }
@@ -156,9 +160,36 @@ class SimRangeSensorData : public SensorData {
 
 vector<RobotVector> SimRangeSensorData::sensors = {
   RobotVector(0.1, 0, 0),
+  RobotVector(0.1, 0.1*PI, 0.1*PI),
+  RobotVector(0.1, 0.2*PI, 0.2*PI),
+  RobotVector(0.1, 0.3*PI, 0.3*PI),
+  RobotVector(0.1, 0.4*PI, 0.4*PI),
   RobotVector(0.1, 0.5*PI, 0.5*PI),
-  RobotVector(0.1, PI, PI),
-  RobotVector(0.1, 1.5*PI, 1.5*PI)
+  RobotVector(0.1, 0.6*PI, 0.6*PI),
+  RobotVector(0.1, 0.7*PI, 0.7*PI),
+  RobotVector(0.1, 0.8*PI, 0.8*PI),
+  RobotVector(0.1, 0.9*PI, 0.9*PI),
+  RobotVector(0.1, 1.0*PI, 1.0*PI),
+  RobotVector(0.1, 1.1*PI, 1.1*PI),
+  RobotVector(0.1, 1.2*PI, 1.2*PI),
+  RobotVector(0.1, 1.3*PI, 1.3*PI),
+  RobotVector(0.1, 1.4*PI, 1.4*PI),
+  RobotVector(0.1, 1.5*PI, 1.5*PI),
+  RobotVector(0.1, 1.6*PI, 1.6*PI),
+  RobotVector(0.1, 1.7*PI, 1.7*PI),
+  RobotVector(0.1, 1.8*PI, 1.8*PI),
+  RobotVector(0.1, 1.9*PI, 1.9*PI)
+};
+
+class SimRangeSensorDataNoisy : public SimRangeSensorData {
+ public:
+  SimRangeSensorDataNoisy(RobotPose truePose, const Map& map)
+      : SimRangeSensorData(truePose, map) {
+    for (int i = 0; i < trueRangeSig.size(); ++i) {
+      double noise = gaussianSample(0.3);
+      trueRangeSig[i] += noise;
+    }
+  }
 };
 
 int main() {
@@ -176,7 +207,7 @@ int main() {
     pf.renderLoc();
     drawRect(truePose.x-0.05, truePose.y-0.05, 0.1, 0.1, 0.0, 1.0, 0.0);
     drawFrame();
-    loc::Particle best = pf.update(SimRangeSensorData(truePose, testMap));
+    loc::Particle best = pf.update(SimRangeSensorDataNoisy(truePose, testMap));
     cout << "Pose: " << truePose << endl;
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
