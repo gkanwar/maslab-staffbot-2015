@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-extern uint32_t samples[360];
+extern uint32_t lidarSamples[360];
 
 typedef struct {
   uint16_t distance_mm:14;

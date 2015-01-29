@@ -16,7 +16,7 @@ ifndef EDISON
 endif
 
 # ALL target: build every binary
-all: builddir tests main_sim
+all: builddir tests main_sim main
 
 builddir:
 	mkdir -p $(OBJDIR)
@@ -56,6 +56,15 @@ main_sim_depend: .main_sim_depend
 	g++ $(INCLUDES) $(CXXFLAGS) -MM $^ > .main_sim_depend
 main_sim: $(MAIN_SIM_SRCS) librobot
 	g++ $(INCLUDES) $(CXXFLAGS) $(MAIN_SIM_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
+
+# MAIN
+MAIN_SRCS = $(SRCDIR)/main.cpp
+main_depend: .main_depend
+.main_depend: $(MAIN_SRCS)
+	rm -f .main_depend
+	g++ $(INCLUDES) $(CXXFLAGS) -MM $^ > .main_depend
+main: $(MAIN_SRCS) librobot
+	g++ $(INCLUDES) $(CXXFLAGS) $(MAIN_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
 
 # CLEAN
 clean:

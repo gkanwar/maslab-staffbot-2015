@@ -5,7 +5,7 @@
 #define START 0xFA
 #define FRAME_LENGTH 22
 
-uint32_t samples[360] = {0xFFFFFFFF};
+uint32_t lidarSamples[360] = {0xFFFFFFFF};
 
 typedef enum {
   lidarState_lookingForStart,
@@ -95,7 +95,7 @@ void processLidarFrame(lidar_frame_t *frame) {
   lidar_reading_t tmp;
   for (uint8_t i = 0; i < 4; i++) {
     tmp = frame->readings[i];
-    uint32_t *bucket = &(samples[degreeStart + i]);
+    uint32_t *bucket = &(lidarSamples[degreeStart + i]);
     if (tmp.invalidData) {
       *bucket = 0xFFFFFFFF;
     } else {
@@ -106,7 +106,7 @@ void processLidarFrame(lidar_frame_t *frame) {
   if (frame->index == 0xF9) {
     printf("*****START*****\r\n");
     for (uint16_t i = 0; i < 360; i++) {
-        printf("%4d ", samples[i]);
+        printf("%4d ", lidarSamples[i]);
         if (i % 20 == 19) {
           printf("\r\n");
         }

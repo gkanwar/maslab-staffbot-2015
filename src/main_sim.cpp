@@ -1,10 +1,9 @@
-#include "localization.h"
-
 #include <thread>
 #include <chrono>
 #include <cmath>
 #include <vector>
 
+#include "localization.h"
 #include "render.h"
 #include "sensor_data.h"
 #include "sim_control.h"
@@ -55,9 +54,6 @@ class SimSensorData : public SensorData {
 
 class SimRangeSensorData : public SensorData {
  private:
-  // TODO: Update this to be reasonable
-  static constexpr double rangeThresh = 100.0;
-
   RobotPose truePose;
 
   vector<double> buildRangeSignature(RobotPose pose, const Map& map) const {
