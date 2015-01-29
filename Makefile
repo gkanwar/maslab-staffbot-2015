@@ -26,10 +26,10 @@ builddir:
 	mkdir -p $(LIBDIR)
 
 # GTEST library
-libgtest: gtest-all.o
+libgtest: $(OBJDIR)/gtest-all.o
 	ar -rv $(LIBDIR)/libgtest.a $(OBJDIR)/gtest-all.o
-gtest-all.o: $(GTEST)/src/gtest-all.cc
-	g++ $(INCLUDES) $(CXXFLAGS) -c $(GTEST)/src/gtest-all.cc -o $(OBJDIR)/gtest-all.o
+$(OBJDIR)/gtest-all.o: $(GTEST)/src/gtest-all.cc
+	g++ $(INCLUDES) $(CXXFLAGS) -c $(GTEST)/src/gtest-all.cc -o $@
 
 # ROBOT modules library
 ROBOT_SRCS = $(wildcard $(SRCDIR)/*.cpp)

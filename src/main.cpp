@@ -69,6 +69,8 @@ class LidarRangeSensorData : public SensorData {
 vector<RobotVector> LidarRangeSensorData::sensors = {};
 
 int main() {
+  signal(SIGINT, sig_handler);
+
   Map testMap = getTestMap();
   RealControl control;
   StateEstimator estimator(testMap.getInitPose(), control);
@@ -88,6 +90,8 @@ int main() {
 
     pf.step(robotDelta);
   }
+
+  cout << "Exiting" << endl;
 
   return 0;
 }
