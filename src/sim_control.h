@@ -12,12 +12,13 @@ class SimControl : public Control {
   double leftSpeed, rightSpeed;
  public:
   SimControl() : leftEncoder(0), rightEncoder(0) {}
-  void setMotorSpeeds(double leftPower, double rightPower);
+  virtual void setLeftSpeed(double leftPower) override;
+  virtual void setRightSpeed(double rightPower) override;
   void tick(TimePoint time);
-  int getLeftEncoder() const {
+  virtual int getLeftEncoder() const override{
     return leftEncoder;
   }
-  int getRightEncoder() const {
+  virtual int getRightEncoder() const override{
     return rightEncoder;
   }
 };

@@ -2,14 +2,6 @@
 
 #include "gtest/gtest.h"
 
-TEST(MapTest, TestEmptyMap) {
-  Map m({}, {});
-  EXPECT_EQ(Map::NONE, m.getMapElement(0.0, 0.0));
-  EXPECT_EQ(Map::NONE, m.getMapElement(50.0, 50.0));
-  EXPECT_EQ(Map::NONE, m.getMapElement(0.0, 50.0));
-  EXPECT_EQ(Map::NONE, m.getMapElement(50.0, 0.0));
-}
-
 TEST(MapTest, TestWallRaster) {
   Map m({Wall(5.0, 5.0, 10.0, 10.0)}, {});
 
