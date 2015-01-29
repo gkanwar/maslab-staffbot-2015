@@ -22,6 +22,8 @@ RobotMotionDelta StateEstimator::tick(TimePoint time, RobotPose* pose) {
   leftEncoder = encL;
   rightEncoder = encR;
   lastEst.addDelta(deltaPose);
-  *pose = lastEst;
+  if (pose != nullptr) {
+    *pose = lastEst;
+  }
   return deltaPose;
 }

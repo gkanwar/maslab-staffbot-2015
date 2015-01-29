@@ -14,11 +14,7 @@
 using namespace std;
 
 Map getTestMap() {
-  return Map({
-      Wall(1.0, 1.0, 1.0, 7.0),
-      Wall(1.0, 7.0, 10.0, 7.0),
-      Wall(10.0, 7.0, 10.0, 1.0)},
-    { Wall(10.0, 1.0, 1.0, 1.0) });
+  return Map("maps/test.map");
 }
 
 // Basic "sensor data" which computes probabilities based on closeness to
@@ -190,7 +186,7 @@ class SimRangeSensorDataNoisy : public SimRangeSensorData {
 
 int main() {
   Map testMap = getTestMap();
-  RobotPose truePose(5.0, 5.0, 0.0);
+  RobotPose truePose = testMap.getInitPose();
   SimControl control;
   StateEstimator estimator(truePose, control);
 

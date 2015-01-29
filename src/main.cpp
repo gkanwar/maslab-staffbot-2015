@@ -13,11 +13,7 @@
 using namespace std;
 
 Map getTestMap() {
-  return Map({
-      Wall(1.0, 1.0, 1.0, 7.0),
-      Wall(1.0, 7.0, 10.0, 7.0),
-      Wall(10.0, 7.0, 10.0, 1.0)},
-    { Wall(10.0, 1.0, 1.0, 1.0) });
+  return Map("maps/test.map");
 }
 
 class LidarRangeSensorData : public SensorData {
@@ -58,9 +54,8 @@ class LidarRangeSensorData : public SensorData {
 
 int main() {
   Map testMap = getTestMap();
-  RobotPose initPose(5.0, 5.0, 0.0);
   RealControl control;
-  StateEstimator estimator(initPose, control);
+  StateEstimator estimator(testMap.getInitPose(), control);
 
   loc::ParticleFilter pf(5.0, 5.0, testMap);
   while (true) {
@@ -74,7 +69,7 @@ int main() {
     control.tick(curTime);
     
     // Update our estimate
-    RobotMotionDelta robotDelta = estimator.tick(curTime, &initPose);
+    RobotMotionDelta robotDelta = estimator.tick(curTime, nullptr);
 
     pf.step(robotDelta);
   }
