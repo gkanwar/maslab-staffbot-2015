@@ -5,12 +5,15 @@
 // Random numbers...
 #define MOTOR_SPEED_PER_POWER 10.0
 
-void SimControl::setMotorSpeeds(double leftPower, double rightPower) {
+void SimControl::setLeftSpeed(double leftPower) {
   rassert(-1.0 <= leftPower && leftPower <= 1.0)
       << "Left motor speed " << leftPower << " is outside [-1, 1]";
+  leftSpeed = leftPower * MOTOR_SPEED_PER_POWER;
+}
+
+void SimControl::setRightSpeed(double rightPower) {
   rassert(-1.0 <= rightPower && rightPower <= 1.0)
       << "Right motor speed " << rightPower << " is outside [-1, 1]";
-  leftSpeed = leftPower * MOTOR_SPEED_PER_POWER;
   rightSpeed = rightPower * MOTOR_SPEED_PER_POWER;
 }
 

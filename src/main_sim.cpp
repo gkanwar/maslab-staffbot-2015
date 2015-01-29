@@ -211,7 +211,8 @@ int main() {
     cout << "Pose: " << truePose << endl;
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
-    control.setMotorSpeeds(0.5, 0.3);
+    control.setLeftSpeed(0.5);
+    control.setRightSpeed(0.3);
     control.tick(curTime);
     
     // Sim-only step: maintain true info

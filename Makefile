@@ -7,6 +7,8 @@ TESTDIR = test
 
 INCLUDES = -I$(GTEST)/include -I$(GTEST)/ -I$(SRCDIR)/
 CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread -pg
+# $EDISON set to 1 to compile in mraa, 0 otherwise
+CXXFLAGS += -DEDISON=$(EDISON)
 LINKFLAGS = -lGL -lglut
 
 # ALL target: build every binary
