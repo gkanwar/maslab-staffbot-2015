@@ -60,13 +60,12 @@ void Map::fillLine(int startGX, int startGY, int endGX, int endGY, MapElement el
   else if (abs(endGX-startGX) == abs(endGY-startGY)) { // 45-degree line
     int loopStartX = (startGX < endGX) ? startGX : endGX;
     int loopEndX = (startGX < endGX) ? endGX : startGX;
-    int loopStartY = (startGY < endGY) ? startGY : endGY;
-    int loopEndY = (startGY < endGY) ? endGY : startGY;
-    int y = loopStartY;
+    int y = (startGX < endGX) ? startGY : endGY;
+    int yInc = (startGX < endGX && startGY < endGY ||
+                startGX > endGX && startGY > endGY) ? 1 : -1;
     for (int x = loopStartX; x <= loopEndX; ++x) {
-      rassert(y <= loopEndY);
       grid[x][y] = elt;
-      ++y;
+      y += yInc;
     }
   }
   else {

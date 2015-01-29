@@ -57,8 +57,9 @@ class SimRangeSensorData : public SensorData {
     for (const RobotVector& sensorPos : sensors) {
       Vector origin = sensorPos.getGlobalPos(pose);
       double theta = sensorPos.getGlobalTheta(pose);
-      rassert(map.isValidPoint(origin.x, origin.y))
-          << "Invalid sensor origin: " << origin;
+      if (!map.isValidPoint(origin.x, origin.y)) {
+        sig.push_back(-1);
+      }
 
       // TODO: This is slow, we can do this smarter if needed
       // vector< pair<int, int> > intersected;
@@ -184,13 +185,14 @@ class SimRangeSensorDataNoisy : public SimRangeSensorData {
   }
 };
 
-int main() {
-  Map testMap = getTestMap();
+int main(int argc, char** argv) {
+  rassert(argc == 2) << "Must pass map name as argument";
+  Map testMap(argv[1]);
   RobotPose truePose = testMap.getInitPose();
   SimControl control;
   StateEstimator estimator(truePose, control);
 
-  loc::ParticleFilter pf(5.0, 5.0, testMap);
+  loc::ParticleFilter pf(truePose.x, truePose.y, testMap);
   // Fake time for sim
   TimePoint curTime;
   const chrono::duration<long int, milli> deltaTime = chrono::milliseconds(500);
