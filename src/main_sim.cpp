@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
   loc::ParticleFilter pf(truePose.x, truePose.y, testMap);
   // Fake time for sim
   TimePoint curTime;
-  const chrono::duration<long int, milli> deltaTime = chrono::milliseconds(500);
+  const chrono::duration<long int, milli> deltaTime = chrono::milliseconds(10);
   while (true) {
     testMap.renderMap();
     pf.renderLoc();
@@ -205,8 +205,8 @@ int main(int argc, char** argv) {
     cout << "Pose: " << truePose << endl;
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
-    control.setLeftSpeed(0.5);
-    control.setRightSpeed(0.3);
+    control.setLeftSpeed(0.2);
+    control.setRightSpeed(0.1);
     control.tick(curTime);
     
     // Sim-only step: maintain true info

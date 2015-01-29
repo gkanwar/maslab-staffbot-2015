@@ -35,6 +35,7 @@ class LidarRangeSensorData : public SensorData {
   LidarRangeSensorData() {
     if (sensors.empty()) {
       for (int i = 0; i < 360; ++i) {
+        if (i % 10 != 0) continue;
         sensors.emplace_back(0.076, i*(2*PI/360.0), i*(2*PI/360.0));
       }
     }
@@ -44,6 +45,7 @@ class LidarRangeSensorData : public SensorData {
     // cout << "sig done" << endl;
     Prob out = Prob::makeFromLinear(1.0);
     for (int i = 0; i < 360; ++i) {
+      if (i % 10 != 0) continue;
       uint32_t rangeInt = lidarSamples[i];
       if (rangeInt == 0xFFFFFFFF) continue;
       double range = rangeInt/1000.0;
