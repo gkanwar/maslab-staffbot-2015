@@ -23,7 +23,7 @@ class RealControl : public Control {
     lidar_init();
   }
   virtual int getLeftEncoder() const override {
-    return encLeft.getCount();
+    return -1 * encLeft.getCount();
   }
   virtual int getRightEncoder() const override {
     return encRight.getCount();
