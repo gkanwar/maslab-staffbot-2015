@@ -2,28 +2,26 @@
 
 #include <cmath>
 
+#include "control.h"
 #include "robot.h"
 #include "util.h"
 
-#define MOTOR_SPEED_PER_POWER 10.0
-
 RobotMotionDelta StateEstimator::tick(TimePoint time, RobotPose* pose) {
   RobotMotionDelta deltaPose(0, 0);
+  int encR = control.getRightEncoder();
+  int encL = control.getLeftEncoder();
   if (init) {
-    DurationMicro diff = chrono::duration_cast<DurationMicro>(time - lastUpdate);
-    double deltaT = 0.000001 * diff.count();
-    double rot = deltaT * (rightMotorSpeed - leftMotorSpeed) / 2.0;
-    double forward = deltaT * (rightMotorSpeed + leftMotorSpeed) / 2.0;
+    int deltaR = encR - rightEncoder;
+    int deltaL = encL - leftEncoder;
+    double rot = (deltaR - deltaL) / (MOTOR_TICKS_PER_SPEED * 2.0);
+    double forward = (deltaR + deltaL) / (MOTOR_TICKS_PER_SPEED * 2.0);
     deltaPose = RobotMotionDelta(forward, rot);
-    lastEst.addDelta(deltaPose);
   }
-  lastUpdate = time;
+  
   init = true;
+  leftEncoder = encL;
+  rightEncoder = encR;
+  lastEst.addDelta(deltaPose);
   *pose = lastEst;
   return deltaPose;
-}
-
-void StateEstimator::updateMotorSpeeds(double leftPower, double rightPower) {
-  leftMotorSpeed = leftPower*MOTOR_SPEED_PER_POWER;
-  rightMotorSpeed = rightPower*MOTOR_SPEED_PER_POWER;
 }

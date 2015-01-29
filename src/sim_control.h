@@ -1,15 +1,25 @@
 #ifndef SIM_CONTROL_H
 #define SIM_CONTROL_H
 
+#include "control.h"
 #include "state_estimator.h"
 
-class SimControl {
+class SimControl : public Control {
  private:
-  StateEstimator& estimator;
+  bool init = false;
+  TimePoint lastTime;
+  int leftEncoder, rightEncoder;
+  double leftSpeed, rightSpeed;
  public:
-  // Accepts state estimator 
-  SimControl(StateEstimator& estimator) : estimator(estimator) {}
+  SimControl() : leftEncoder(0), rightEncoder(0) {}
   void setMotorSpeeds(double leftPower, double rightPower);
+  void tick(TimePoint time);
+  int getLeftEncoder() const {
+    return leftEncoder;
+  }
+  int getRightEncoder() const {
+    return rightEncoder;
+  }
 };
 
 #endif

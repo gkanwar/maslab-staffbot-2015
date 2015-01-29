@@ -3,6 +3,7 @@
 
 #include <chrono>
 
+#include "control.h"
 #include "robot.h"
 
 using namespace std;
@@ -15,17 +16,18 @@ typedef chrono::duration<double, micro> DurationMicro;
 // method to access a delta estimate of odometry.
 class StateEstimator {
  private:
+  const Control& control;
   TimePoint lastUpdate;
-  double leftMotorSpeed, rightMotorSpeed;
+  int leftEncoder, rightEncoder;
   RobotPose lastEst;
   bool init;
 
  public:
-  StateEstimator(RobotPose initPose) : lastEst(initPose), init(false) {}
+  StateEstimator(RobotPose initPose, const Control& control)
+      : lastEst(initPose), control(control), init(false) {}
 
   // TODO: For now, just return robot pose and delta
   RobotMotionDelta tick(TimePoint time, RobotPose* pose);
-  void updateMotorSpeeds(double leftPower, double rightPower);
 };
 
 #endif

@@ -195,13 +195,13 @@ class SimRangeSensorDataNoisy : public SimRangeSensorData {
 int main() {
   Map testMap = getTestMap();
   RobotPose truePose(5.0, 5.0, 0.0);
-  StateEstimator estimator(truePose);
-  SimControl control(estimator);
+  SimControl control;
+  StateEstimator estimator(truePose, control);
 
   loc::ParticleFilter pf(5.0, 5.0, testMap);
   // Fake time for sim
   TimePoint curTime;
-  const chrono::duration<long int, milli> deltaTime = chrono::milliseconds(50);
+  const chrono::duration<long int, milli> deltaTime = chrono::milliseconds(500);
   while (true) {
     testMap.renderMap();
     pf.renderLoc();
@@ -212,7 +212,8 @@ int main() {
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
     control.setMotorSpeeds(0.5, 0.3);
-
+    control.tick(curTime);
+    
     // Sim-only step: maintain true info
     RobotMotionDelta robotDelta = estimator.tick(curTime, &truePose);
 
