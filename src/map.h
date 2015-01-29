@@ -10,6 +10,7 @@
 
 #define TILE_SIZE 0.1
 #define GRID_SIZE 101
+#define METERS_PER_UNIT 0.6096
 
 using namespace std;
 
@@ -71,29 +72,38 @@ class Map {
       rassert(tokens.size() > 0);
       if (tokens[0] == "L") {
         rassert(tokens.size() == 3);
-        initPose = RobotPose(stoi(tokens[1]), stoi(tokens[2]), 0);
+        initPose = RobotPose(unitsToMeters(stoi(tokens[1])),
+                             unitsToMeters(stoi(tokens[2])), 0);
       }
       else if (tokens[0] == "W") {
         rassert(tokens.size() == 5);
-        walls.emplace_back(stoi(tokens[1]), stoi(tokens[2]), stoi(tokens[3]), stoi(tokens[4]));
+        walls.emplace_back(unitsToMeters(stoi(tokens[1])),
+                           unitsToMeters(stoi(tokens[2])),
+                           unitsToMeters(stoi(tokens[3])),
+                           unitsToMeters(stoi(tokens[4])));
       }
       else if (tokens[0] == "S") {
         rassert(tokens.size() == 6);
-        stacks.emplace_back(stoi(tokens[1]), stoi(tokens[2]),
+        stacks.emplace_back(unitsToMeters(stoi(tokens[1])),
+                            unitsToMeters(stoi(tokens[2])),
                             (tokens[3] == "R") ? Stack::RED : Stack::GREEN,
                             (tokens[4] == "R") ? Stack::RED : Stack::GREEN,
                             (tokens[5] == "R") ? Stack::RED : Stack::GREEN);
       }
       else if (tokens[0] == "P") {
         rassert(tokens.size() == 5);
-        platforms.emplace_back(stoi(tokens[1]), stoi(tokens[2]), stoi(tokens[3]), stoi(tokens[4]));
+        platforms.emplace_back(unitsToMeters(stoi(tokens[1])),
+                               unitsToMeters(stoi(tokens[2])),
+                               unitsToMeters(stoi(tokens[3])),
+                               unitsToMeters(stoi(tokens[4])));
       }
       else if (tokens[0] == "H") {
         int numPts = stoi(tokens[1]);
         rassert(tokens.size() == 2*numPts + 2);
         vector<Point> hbPoints;
         for (int i = 0; i < numPts; ++i) {
-          hbPoints.emplace_back(stoi(tokens[2+2*i]), stoi(tokens[3+2*i]));
+          hbPoints.emplace_back(unitsToMeters(stoi(tokens[2+2*i])),
+                                unitsToMeters(stoi(tokens[3+2*i])));
         }
         homeBase = HomeBase(hbPoints);
       }
@@ -154,6 +164,11 @@ class Map {
   }
 
  private:
+  // Import map helper: convert map units to meters
+  double unitsToMeters(double units) {
+    return units * METERS_PER_UNIT;
+  }
+
   void initGrid(vector<Wall> walls, vector<Wall> platforms);
 
   void fillLine(int startX, int startY, int endX, int endY, MapElement elt);
