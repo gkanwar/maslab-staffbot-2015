@@ -69,7 +69,7 @@ void Encoder::edgeISR(mraa::Gpio *pin) {
 
 void Encoder::updateTick(uint8_t oldPhase, uint8_t newPhase) {
   int8_t delta = newPhase - oldPhase; 
-  printf("Old: %x New: %x Delta: %d Count: %d\r\n", oldPhase, newPhase, delta, count);
+  //printf("Old: %x New: %x Delta: %d Count: %d\r\n", oldPhase, newPhase, delta, count);
   if ((delta == 1) || (delta == -3)) {
     count++;
   } else if ((delta  == -1) || (delta == 3)) {
@@ -109,8 +109,7 @@ Encoder::~Encoder() {
   delete isrArgsB;
 }
 
-int32_t Encoder::getCount() {
-  printf("Returning Count: %d \r\n", count);
+int32_t Encoder::getCount() const {
   return count;
 }
 

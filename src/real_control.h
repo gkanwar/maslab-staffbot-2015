@@ -7,6 +7,7 @@
 #include "lidar.h"
 #include "encoder.h"
 #include "motor.h"
+#include "pinDef.h"
 
 class RealControl : public Control {
  private:

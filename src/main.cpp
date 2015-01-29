@@ -1,9 +1,11 @@
 #include <chrono>
 #include <cmath>
+#include <csignal>
 #include <vector>
 
 #include "lidar.h"
 #include "localization.h"
+#include "real_control.h"
 #include "render.h"
 #include "sensor_data.h"
 #include "state_estimator.h"
@@ -11,6 +13,14 @@
 #include "util.h"
 
 using namespace std;
+
+int running = 1;
+
+void sig_handler(int signo) {
+  if (signo == SIGINT) {
+    running = 0;
+  }
+}
 
 Map getTestMap() {
   return Map({
@@ -36,7 +46,9 @@ class LidarRangeSensorData : public SensorData {
     // cout << "sig done" << endl;
     Prob out = Prob::makeFromLinear(1.0);
     for (int i = 0; i < 360; ++i) {
-      double range = lidarSamples[i];
+      uint32_t rangeInt = lidarSamples[i];
+      if (rangeInt == 0xFFFFFFFF) continue;
+      double range = rangeInt/1000.0;
       // Skip invalid readings
       // TODO: Perhaps use a low-weighted correlation to expected 
       if (range < 0) continue;
@@ -56,6 +68,8 @@ class LidarRangeSensorData : public SensorData {
   }
 };
 
+vector<RobotVector> LidarRangeSensorData::sensors = {};
+
 int main() {
   Map testMap = getTestMap();
   RobotPose initPose(5.0, 5.0, 0.0);
@@ -63,15 +77,14 @@ int main() {
   StateEstimator estimator(initPose, control);
 
   loc::ParticleFilter pf(5.0, 5.0, testMap);
-  while (true) {
+  while (running) {
     TimePoint curTime = chrono::system_clock::now();
     loc::Particle best = pf.update(LidarRangeSensorData());
     // cout << "Pose: " << truePose << endl;
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
-    control.setLeftSpeed(0.5);
-    control.setRightSpeed(0.3);
-    control.tick(curTime);
+    control.setLeftSpeed(0.2);
+    control.setRightSpeed(0.1);
     
     // Update our estimate
     RobotMotionDelta robotDelta = estimator.tick(curTime, &initPose);

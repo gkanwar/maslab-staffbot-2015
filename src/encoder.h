@@ -24,7 +24,7 @@ class Encoder {
   public:
     Encoder(uint8_t phaseApin, uint8_t phaseBpin);
     ~Encoder();
-    int32_t getCount();
+    int32_t getCount() const;
     void edgeISR(mraa::Gpio *pin);
 };
 

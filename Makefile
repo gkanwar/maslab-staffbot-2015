@@ -13,6 +13,8 @@ endif
 LINKFLAGS = 
 ifndef EDISON
 	LINKFLAGS += -lGL -lglut
+else
+	LINKFLAGS += -lmraa
 endif
 
 # ALL target: build every binary
