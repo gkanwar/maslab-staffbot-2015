@@ -64,7 +64,9 @@ main_depend: .main_depend
 	rm -f .main_depend
 	g++ $(INCLUDES) $(CXXFLAGS) -MM $^ > .main_depend
 main: $(MAIN_SRCS) librobot
+ifdef EDISON
 	g++ $(INCLUDES) $(CXXFLAGS) $(MAIN_SRCS) $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/$@
+endif
 
 # CLEAN
 clean:

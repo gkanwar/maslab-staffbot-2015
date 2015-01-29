@@ -10,6 +10,8 @@
 #include "random.h"
 #include "util.h"
 
+#if EDISON
+
 using namespace std;
 
 Map getTestMap() {
@@ -76,3 +78,5 @@ int main() {
 
   return 0;
 }
+
+#endif
