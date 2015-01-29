@@ -16,12 +16,11 @@ class RealControl : public Control {
   Motor motLeft;
   Motor motRight;
  public:
+  Lidar lidar;
   RealControl() : encLeft(ENC_LEFT_A_PIN, ENC_LEFT_B_PIN),
                   encRight(ENC_RIGHT_A_PIN, ENC_RIGHT_B_PIN),
                   motLeft(MOTOR_LEFT_PWM_PIN, MOTOR_LEFT_DIR_PIN),
-                  motRight(MOTOR_RIGHT_PWM_PIN, MOTOR_RIGHT_DIR_PIN) {
-    lidar_init();
-  }
+                  motRight(MOTOR_RIGHT_PWM_PIN, MOTOR_RIGHT_DIR_PIN) {}
   virtual int getLeftEncoder() const override {
     return -1 * encLeft.getCount();
   }

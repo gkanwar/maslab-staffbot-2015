@@ -36,7 +36,7 @@ class Lidar {
     pthread_join(serialHandler, NULL);
   }
 
-  uint32_t getSample(int i) {
+  uint32_t getSample(int i) const {
     rassert(0 <= i && i < 360);
     return lidarSamples[i];
   }

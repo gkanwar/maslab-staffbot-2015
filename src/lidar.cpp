@@ -103,6 +103,7 @@ void Lidar::processLidarFrame(lidar_frame_t *frame) {
     }
   }
 
+  /*
   if (frame->index == 0xF9) {
     printf("*****START*****\r\n");
     for (uint16_t i = 0; i < 360; i++) {
@@ -113,4 +114,5 @@ void Lidar::processLidarFrame(lidar_frame_t *frame) {
     }
     printf("*****END*****\r\n");
   }
+  */
 }

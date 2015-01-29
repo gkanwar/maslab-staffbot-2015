@@ -17,8 +17,8 @@ namespace loc {
 ParticleFilter::ParticleFilter(double startX, double startY, Map map) : map(map) {
   for (int i = 0; i < NUM_PARTS; ++i) {
     // Just guessing at some reasonable noise
-    double partX = startX + gaussianSample(0.5);
-    double partY = startY + gaussianSample(0.5);
+    double partX = startX + gaussianSample(0.1);
+    double partY = startY + gaussianSample(0.1);
     double theta = uniformSample(0.0, 2*PI);
     particles.emplace_back(RobotPose(partX, partY, theta),
                            Prob::makeFromLinear(1.0));

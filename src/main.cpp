@@ -31,8 +31,9 @@ Map getTestMap() {
 class LidarRangeSensorData : public SensorData {
  public:
   static vector<RobotVector> sensors;
+  const RealControl& control;
 
-  LidarRangeSensorData() {
+  LidarRangeSensorData(const RealControl& control) : control(control) {
     if (sensors.empty()) {
       for (int i = 0; i < 360; ++i) {
         if (i % 10 != 0) continue;
@@ -46,15 +47,17 @@ class LidarRangeSensorData : public SensorData {
     Prob out = Prob::makeFromLinear(1.0);
     for (int i = 0; i < 360; ++i) {
       if (i % 10 != 0) continue;
-      uint32_t rangeInt = lidarSamples[i];
+      uint32_t rangeInt = control.lidar.getSample(i);
+      int sensorIndex = i/10;
+      rassert(sensorIndex < sensors.size());
       if (rangeInt == 0xFFFFFFFF) continue;
       double range = rangeInt/1000.0;
       // Skip invalid readings
       // TODO: Perhaps use a low-weighted correlation to expected 
       if (range < 0) continue;
 
-      Vector origin = sensors[i].getGlobalPos(pose);
-      double sensorTheta = sensors[i].getGlobalTheta(pose);
+      Vector origin = sensors[sensorIndex].getGlobalPos(pose);
+      double sensorTheta = sensors[sensorIndex].getGlobalTheta(pose);
       Vector endpoint = getEndpoint(origin, sensorTheta, range);
       Vector endpointClamped = map.clampPoint(endpoint);
       Vector closest = map.getClosest(endpointClamped.x, endpointClamped.y);
@@ -82,9 +85,11 @@ int main(int argc, char** argv) {
   loc::ParticleFilter pf(testMap.getInitPose().x, testMap.getInitPose().y, testMap);
   while (running) {
     TimePoint curTime = chrono::system_clock::now();
-    loc::Particle best = pf.update(LidarRangeSensorData());
+    loc::Particle best = pf.update(LidarRangeSensorData(control));
     // cout << "Pose: " << truePose << endl;
-    cout << "Best particle: " << best.pose << endl;
+    cout << "Best particle: " << best.pose.x/METERS_PER_UNIT - 2
+	 << "," << best.pose.y/METERS_PER_UNIT - 3 << ","
+	 << best.pose.theta << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
     //control.setLeftSpeed(0.2);
     //control.setRightSpeed(0.1);
