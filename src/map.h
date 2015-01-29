@@ -60,7 +60,7 @@ class Map {
     while (!file.eof()) {
       char line[1024];
       file.getline(line, 1024);
-      rassert(!file.fail());
+      if (file.fail()) continue;
       string str(line);
       istringstream iss(str);
       vector<string> tokens;

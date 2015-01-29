@@ -5,7 +5,7 @@
 
 #include "util.h"
 
-#define ROBOT_RADIUS 0.20
+#define ROBOT_RADIUS 0.088
 
 using namespace std;
 

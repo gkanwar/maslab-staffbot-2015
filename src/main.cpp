@@ -68,22 +68,24 @@ class LidarRangeSensorData : public SensorData {
 
 vector<RobotVector> LidarRangeSensorData::sensors = {};
 
-int main() {
+int main(int argc, char** argv) {
+  rassert(argc == 2) << "Must give map as argument";
   signal(SIGINT, sig_handler);
 
-  Map testMap = getTestMap();
+  Map testMap(argv[1]);
   RealControl control;
   StateEstimator estimator(testMap.getInitPose(), control);
 
-  loc::ParticleFilter pf(5.0, 5.0, testMap);
+  // TODO: Fix interface
+  loc::ParticleFilter pf(testMap.getInitPose().x, testMap.getInitPose().y, testMap);
   while (running) {
     TimePoint curTime = chrono::system_clock::now();
     loc::Particle best = pf.update(LidarRangeSensorData());
     // cout << "Pose: " << truePose << endl;
     cout << "Best particle: " << best.pose << endl;
     cout << "Weight: " << best.weight.getProb() << endl;
-    control.setLeftSpeed(0.2);
-    control.setRightSpeed(0.1);
+    //control.setLeftSpeed(0.2);
+    //control.setRightSpeed(0.1);
     
     // Update our estimate
     RobotMotionDelta robotDelta = estimator.tick(curTime, nullptr);

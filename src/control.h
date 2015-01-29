@@ -1,8 +1,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-// TODO: Random number, should be updated
-#define MOTOR_TICKS_PER_SPEED 3600
+#define MOTOR_TICKS_PER_SPEED 7500
 
 class Control {
  public:
