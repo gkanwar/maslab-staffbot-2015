@@ -2,23 +2,27 @@
 
 #include <stdio.h>
 
+#include "uart.h"
+
 #define START 0xFA
 #define FRAME_LENGTH 22
 
-uint32_t lidarSamples[360] = {0xFFFFFFFF};
+void *handleSerial(void* args) {
+  Lidar *obj = (Lidar*)args;
+  int32_t fd = uart_init();
+  while (obj->running) {
+    uint8_t buf;
+    while (read(fd, &buf, 1) > 0) {
+      obj->processByte(buf);
+    }
+    usleep(10000);
+  }
+  return nullptr;
+}
 
-typedef enum {
-  lidarState_lookingForStart,
-  lidarState_receivingFrames
-} lidarState_t;
+namespace {
 
-uint8_t frameBuf[22] = {0};
-uint8_t frameIdx = 0; 
-
-static lidarState_t state = lidarState_lookingForStart;
-static lidarFrameCallback_t frameCb = NULL;
-
-static uint16_t computeChecksum(uint16_t *buf) {
+uint16_t computeChecksum(uint16_t *buf) {
   uint32_t checksum = 0;
   uint8_t i = 0;
   for (i = 0; i < FRAME_LENGTH/2 - 1; i++) {
@@ -29,7 +33,9 @@ static uint16_t computeChecksum(uint16_t *buf) {
   return checksum;
 }
 
-static lidarState_t lookingForStart(uint8_t b) {
+}  // anonymous namespace
+
+Lidar::lidarState_t Lidar::lookingForStart(uint8_t b) {
   if (b == START && frameIdx == 0) {
     frameBuf[frameIdx++] = b;
   } else if (frameIdx > 0) {
@@ -45,21 +51,19 @@ static lidarState_t lookingForStart(uint8_t b) {
     
     frameIdx = 0;
     if (checksum == rxChecksum) {
-      return lidarState_receivingFrames;
+      return Lidar::lidarState_receivingFrames;
       printf("Found Start!!");
     }
   }
-  return lidarState_lookingForStart;
+  return Lidar::lidarState_lookingForStart;
 }
 
-static void processFrame(uint8_t *buf) {
-  lidar_frame_t *frame = (lidar_frame_t *)buf;
-  if (frameCb != NULL) {
-    frameCb(frame);
-  }
+void Lidar::processFrame(uint8_t *buf) {
+ lidar_frame_t *frame = (lidar_frame_t *)buf;
+ processLidarFrame(frame);
 }
 
-static lidarState_t receiveFrames(uint8_t b) {
+Lidar::lidarState_t Lidar::receiveFrames(uint8_t b) {
   frameBuf[frameIdx++] = b;
   if (frameIdx == FRAME_LENGTH) {
     uint16_t checksum = computeChecksum((uint16_t *)frameBuf);
@@ -67,14 +71,14 @@ static lidarState_t receiveFrames(uint8_t b) {
                           ((frameBuf[FRAME_LENGTH - 1] & 0xFF) << 8);
     frameIdx = 0;
     if (checksum != rxChecksum) {
-      return lidarState_lookingForStart;
+      return Lidar::lidarState_lookingForStart;
     }
     processFrame(frameBuf);
   }
-  return lidarState_receivingFrames;
+  return Lidar::lidarState_receivingFrames;
 }
 
-void lidar_processByte(uint8_t b) {
+void Lidar::processByte(uint8_t b) {
   switch (state) {
     case lidarState_lookingForStart:
       state = lookingForStart(b);
@@ -85,12 +89,8 @@ void lidar_processByte(uint8_t b) {
   }
 }
 
-void _lidar_init(lidarFrameCallback_t cb) {
-  frameCb = cb;
-}
 
-
-void processLidarFrame(lidar_frame_t *frame) {
+void Lidar::processLidarFrame(lidar_frame_t *frame) {
   uint16_t degreeStart = (frame->index - 0xA0) * 4;
   lidar_reading_t tmp;
   for (uint8_t i = 0; i < 4; i++) {
@@ -113,8 +113,4 @@ void processLidarFrame(lidar_frame_t *frame) {
     }
     printf("*****END*****\r\n");
   }
-}
-
-void lidar_init() {
-  _lidar_init(&processLidarFrame);
 }
