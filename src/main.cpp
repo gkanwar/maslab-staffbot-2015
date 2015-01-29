@@ -12,6 +12,8 @@
 #include "random.h"
 #include "util.h"
 
+#if EDISON
+
 using namespace std;
 
 int running = 1;
@@ -23,11 +25,7 @@ void sig_handler(int signo) {
 }
 
 Map getTestMap() {
-  return Map({
-      Wall(1.0, 1.0, 1.0, 7.0),
-      Wall(1.0, 7.0, 10.0, 7.0),
-      Wall(10.0, 7.0, 10.0, 1.0)},
-    { Wall(10.0, 1.0, 1.0, 1.0) });
+  return Map("maps/test.map");
 }
 
 class LidarRangeSensorData : public SensorData {
@@ -72,9 +70,8 @@ vector<RobotVector> LidarRangeSensorData::sensors = {};
 
 int main() {
   Map testMap = getTestMap();
-  RobotPose initPose(5.0, 5.0, 0.0);
   RealControl control;
-  StateEstimator estimator(initPose, control);
+  StateEstimator estimator(testMap.getInitPose(), control);
 
   loc::ParticleFilter pf(5.0, 5.0, testMap);
   while (running) {
@@ -87,10 +84,12 @@ int main() {
     control.setRightSpeed(0.1);
     
     // Update our estimate
-    RobotMotionDelta robotDelta = estimator.tick(curTime, &initPose);
+    RobotMotionDelta robotDelta = estimator.tick(curTime, nullptr);
 
     pf.step(robotDelta);
   }
 
   return 0;
 }
+
+#endif

@@ -4,6 +4,30 @@
 
 #include "render.h"
 
+void Map::initGrid(vector<Wall> walls, vector<Wall> platforms) {
+  for (int i = 0; i < GRID_SIZE; ++i) {
+    for (int j = 0; j < GRID_SIZE; ++j) {
+      grid[i][j] = NONE;
+    }
+  }
+
+  for (Wall w : walls) {
+    checkPoint(w.startX, w.startY);
+    checkPoint(w.endX, w.endY);
+    fillLine(toGridCoord(w.startX), toGridCoord(w.startY),
+             toGridCoord(w.endX), toGridCoord(w.endY), WALL);
+  }
+
+  for (Wall p : platforms) {
+    checkPoint(p.startX, p.startY);
+    checkPoint(p.endX, p.endY);
+    // TODO: This assumes platform extends for the entire wall segment
+    fillLine(toGridCoord(p.startX), toGridCoord(p.startY),
+             toGridCoord(p.endX), toGridCoord(p.endY), PLATFORM);
+  }
+
+  buildClosestMap();
+}
 
 // Rasterize a line into our grid
 // startGX, startGY, endGX, endGY all in grid units
