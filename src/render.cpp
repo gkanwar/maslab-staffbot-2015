@@ -1,5 +1,7 @@
 #include "render.h"
 
+#ifndef EDISON
+
 #include <chrono>
 #include <cstdlib>
 #include <GL/glut.h>
@@ -132,16 +134,20 @@ void initRender() {
 }
 
 }  // anonymous namespace
+#endif
 
 void drawFrame(bool waitForKey) {
+#ifndef EDISON
   frameDirty = true;
   waitKey = waitForKey;
   while (frameDirty || waitKey) {
     this_thread::sleep_for(chrono::milliseconds(10));
   }
+#endif
 }
 
 void drawRect(double x, double y, double w, double h, double r, double g, double b) {
+#ifndef EDISON
   initRender();
 
   RenderRect rect;
@@ -153,8 +159,12 @@ void drawRect(double x, double y, double w, double h, double r, double g, double
   rect.g = g;
   rect.b = b;
   rects.push_back(rect);
+#endif
 }
 
 void joinRenderThread() {
+#ifndef EDISON
   pthread_join(glutThread, NULL);
+#endif
 }
+

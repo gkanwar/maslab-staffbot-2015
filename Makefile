@@ -6,11 +6,22 @@ BINDIR = bin
 TESTDIR = test
 
 INCLUDES = -I$(GTEST)/include -I$(GTEST)/ -I$(SRCDIR)/
-CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread -pg
-LINKFLAGS = -lGL -lglut
+CXXFLAGS += -std=c++0x -g -Wall -Wextra -pthread -pg 
+ifdef EDISON
+	CXXFLAGS += -DEDISON
+endif
+LINKFLAGS = 
+ifndef EDISON
+	LINKFLAGS += -lGL -lglut
+endif
 
 # ALL target: build every binary
-all: tests main_sim
+all: builddir tests main_sim
+
+builddir:
+	mkdir -p $(OBJDIR)
+	mkdir -p $(BINDIR)
+	mkdir -p $(LIBDIR)
 
 # GTEST library
 libgtest: gtest-all.o
@@ -34,7 +45,7 @@ tests_depend: .tests_depend
 .tests_depend: $(TEST_SRCS)
 	rm -f .tests_depend
 	g++ $(INCLUDES) $(CXXFLAGS) -MM $^ > .tests_depend
-tests: $(TEST_SRCS) libgtest librobot
+tests: $(TEST_SRCS) libgtest librobot | builddir
 	g++ $(INCLUDES) $(CXXFLAGS) $(TEST_SRCS) $(LIBDIR)/libgtest.a $(LIBROBOT) $(LINKFLAGS) -o $(BINDIR)/tests
 
 # MAIN_SIM
